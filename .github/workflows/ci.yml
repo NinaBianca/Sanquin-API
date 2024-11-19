@@ -29,4 +29,4 @@ jobs:
 
     - name: Run Tests
       run: |
-        pytest --cov=app tests/ 
+        pytest --cov=app api/tests/ 
