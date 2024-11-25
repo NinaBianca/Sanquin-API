@@ -1,14 +1,29 @@
-from typing import Optional
+from fastapi import FastAPI, Response
+from dotenv import load_dotenv
+from routers import users
 
-from fastapi import FastAPI
+try:
+    load_dotenv()
+except Exception as e:
+    SystemExit(f"Error loading .env file: {e}")
 
-app = FastAPI()
+
+app = FastAPI(
+    title="Sanquin API",
+    description="API for the Sanquin project",
+    version="0.1.0",
+    redoc_url=None,
+    docs_url="/docs",
+)
+
+app.include_router(users.router)
 
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
-
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Optional[str] = None):
-    return {"item_id": item_id, "q": q}
+    return Response(
+        content={
+            "message": "Welcome to the Sanquin API! \n Visit /docs for the API documentation."
+        },
+        status_code=200,
+    )
