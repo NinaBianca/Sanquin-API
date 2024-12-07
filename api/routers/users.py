@@ -1,121 +1,117 @@
-from fastapi import APIRouter, params
-from dependencies import get_db
-from models.user.user_collection import UserCollection
-from models.user.user import UserModel
-from models.user.update_user import UpdateUserModel
-from models.response import ResponseModel
-from fastapi import HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+from models.user import User
+from models.enums import FriendshipStatus
+from schemas.response import ResponseModel
+from schemas.user import UserCollection, UserModel, UpdateUserModel
+from sqlalchemy.orm import Session
+from services.user import (
+    create_user,
+    get_user_by_id,
+    get_user_by_username,
+    update_user,
+    delete_user,
+    send_friend_request,
+    edit_friend_request,
+    get_friends,
+    get_friend_requests,
+    get_sent_requests,
+    delete_friend,
+    check_user_exists
+)
+from database import get_db
 
 router = APIRouter(
     prefix="/users",
     tags=["users"],
-    responses={404: {"description": "Not found"}},
 )
 
-user_collection = get_db().get_collection("users")
-
-
-@router.get("/", tags=["users"]) # TODO: Double check if applicable to use case
-async def read_users(skip: int = 0, limit: int = 20):
-    try:
-        users = await user_collection.find().skip(skip).limit(limit).to_list(limit)
-        return ResponseModel(
-            status=200,
-            data=UserCollection(users=users).model_dump(),
-            message="Users retrieved successfully",
-        )
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"An error occurred: {e}"
-        )
-
-
-@router.post("/", response_model=ResponseModel, tags=["users"])
-async def create_user(user: UserModel):
-    if user is None:
-        raise HTTPException(
-            status_code=500,
-            detail="User data is required",
-        )
-    try:
-        existing_user = await user_collection.find_one(
-            {"$or": [{"username": user.username}, {"email": user.email}]}
-        )
-        if existing_user:
-            if existing_user["username"] == user.username:
-                raise HTTPException(
-                    status_code=500,
-                    detail="Username already exists",
-                )
-            if existing_user["email"] == user.email:
-                raise HTTPException(
-                    status_code=500,
-                    detail="Email already exists",
-                )
-        
-        user = await user_collection.insert_one(user.model_dump())
-        return ResponseModel(
-            status=200,
-            data=UserModel(**user).model_dump(),
-            message="User created successfully",
-        )
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"An error occurred: {e}"
-        )
-
-
-@router.post("/login", response_model=ResponseModel, tags=["users"])
-async def login_user(user: UserModel):
-    if user is None:
-        raise HTTPException(
-            status_code=500,
-            detail="User data is required",
-        )
-    try:
-        existing_user = await user_collection.find_one(
-            {"$and": [{"username": user.username}, {"password": user.password}]}
-        )
-        if existing_user:
-            return ResponseModel(
-                status=200,
-                data=UserModel(**existing_user).model_dump(),
-                message="User logged in successfully",
-            )
-        raise HTTPException(
-            status_code=500,
-            detail="Invalid username or password",
-        )
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"An error occurred: {e}"
-        )
-
-
-@router.put("/{user_id}", response_model=ResponseModel, tags=["users"])
-async def update_user(user_id: int, user: UpdateUserModel):
-    if user is None:
-        raise HTTPException(
-            status_code=500,
-            detail="User data is required",
-        )
     
-    try:
-        existing_user = await user_collection.find_one({"_id": user_id})
-        if existing_user:
-            user = await user_collection.update_one(
-                {"_id": user_id}, {"$set": user.model_dump()}
-            )
-            return ResponseModel(
-                status=200,
-                data=UserModel(**user).model_dump(),
-                message="User updated successfully",
-            )
-        raise HTTPException(
-            status_code=500,
-            detail="User not found",
-        )
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"An error occurred: {e}"
-        )
+
+
+@router.post("/", response_model=ResponseModel)
+def create_user_route(user: UserModel, db: Session = Depends(get_db)):
+    if check_user_exists(db, user.id):
+        raise HTTPException(status_code=400, detail=f"Username '{user.username}' is already in use.")
+    
+    new_user = create_user(db, user).model_dump()
+    return ResponseModel(status=200, data=new_user, message="User created successfully")
+
+
+@router.get("/{user_id}", response_model=ResponseModel)
+def get_user_by_id_route(user_id: int, db: Session = Depends(get_db)):
+    if not check_user_exists(db, user_id):
+        raise HTTPException(status_code=404, detail=f"User not found with ID {user_id}")
+    user = get_user_by_id(db, user_id).model_dump()
+    return ResponseModel(status=200, data=user, message="User retrieved successfully")
+
+
+@router.get("/username/{username}", response_model=ResponseModel)
+def get_user_by_username_route(username: str, db: Session = Depends(get_db)):
+    if not check_user_exists(db, username):
+        raise HTTPException(status_code=404, detail=f"User not found with username {username}") 
+    user = get_user_by_username(db, username).model_dump()
+    return ResponseModel(status=200, data=user, message="User retrieved successfully")
+
+
+@router.put("/{user_id}", response_model=ResponseModel)
+def update_user_route(user_id: int, user: UpdateUserModel, db: Session = Depends(get_db)):
+    if not check_user_exists(db, user_id):
+        raise HTTPException(status_code=404, detail=f"User not found with ID {user_id}")
+    updated_user = update_user(db, user_id, user).model_dump()
+    return ResponseModel(status=200, data=updated_user, message="User updated successfully")
+
+
+@router.delete("/{user_id}", response_model=ResponseModel)
+def delete_user_route(user_id: int, db: Session = Depends(get_db)):
+    if not check_user_exists(db, user_id):
+        raise HTTPException(status_code=404, detail=f"User not found with ID {user_id}")
+    delete_user(db, user_id)
+    return ResponseModel(status=200, data=None, message=f"User with ID {user_id} has been deleted")
+
+
+@router.post("/{user_id}/friends/{friend_id}", response_model=ResponseModel)
+def send_friend_request_route(user_id: int, friend_id: int, db: Session = Depends(get_db)):
+    if not check_user_exists(db, friend_id) or not check_user_exists(db, user_id):
+        raise HTTPException(status_code=404, detail=f"User not found with ID {friend_id}")
+    friend_request = send_friend_request(db, user_id, friend_id)
+    return ResponseModel(status=200, data=friend_request, message="Friend request sent successfully")
+
+
+@router.put("/{user_id}/friends/{friend_id}", response_model=ResponseModel)
+def edit_friend_request_route(user_id: int, friend_id: int, status: FriendshipStatus, db: Session = Depends(get_db)):
+    if not check_user_exists(db, friend_id) or not check_user_exists(db, user_id):
+        raise HTTPException(status_code=404, detail=f"User not found with ID {friend_id}")
+    updated_request = edit_friend_request(db, user_id, friend_id, status)
+    return ResponseModel(status=200, data=updated_request, message="Friend request updated successfully")
+
+
+@router.get("/{user_id}/friends", response_model=ResponseModel)
+def get_friends_route(user_id: int, db: Session = Depends(get_db)):
+    if not check_user_exists(db, user_id):
+        raise HTTPException(status_code=404, detail=f"User not found with ID {user_id}")
+    friends = get_friends(db, user_id)
+    return ResponseModel(status=200, data=friends, message="Friends retrieved successfully")
+
+
+@router.get("/{user_id}/friend-requests", response_model=ResponseModel)
+def get_friend_requests_route(user_id: int, db: Session = Depends(get_db)):
+    if not check_user_exists(db, user_id):
+        raise HTTPException(status_code=404, detail=f"User not found with ID {user_id}")
+    friend_requests = get_friend_requests(db, user_id)
+    return ResponseModel(status=200, data=friend_requests, message="Friend requests retrieved successfully")
+
+
+@router.get("/{user_id}/sent-requests", response_model=ResponseModel)
+def get_sent_requests_route(user_id: int, db: Session = Depends(get_db)):
+    if not check_user_exists(db, user_id):
+        raise HTTPException(status_code=404, detail=f"User not found with ID {user_id}")
+    sent_requests = get_sent_requests(db, user_id)
+    return ResponseModel(status=200, data=sent_requests, message="Sent requests retrieved successfully")
+
+
+@router.delete("/{user_id}/friends/{friend_id}", response_model=ResponseModel)
+def delete_friend_route(user_id: int, friend_id: int, db: Session = Depends(get_db)):
+    if not check_user_exists(db, user_id) or not check_user_exists(db, friend_id):
+        raise HTTPException(status_code=404, detail=f"User not found with ID {friend_id}")
+    delete_friend(db, user_id, friend_id)
+    return ResponseModel(status=200, data=None, message=f"Friend with ID {friend_id} has been removed")
