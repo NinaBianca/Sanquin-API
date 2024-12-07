@@ -26,6 +26,8 @@ jobs:
           pip install -r api/requirements.txt
           pip install pytest
 
-      - name: Run Tests
+      - name: Run Tests with GitHub Secrets
         run: |
           pytest --cov=app api/tests/
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
