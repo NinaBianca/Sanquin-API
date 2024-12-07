@@ -30,4 +30,4 @@ jobs:
         run: |
           pytest --cov=app api/tests/
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          POSTGRES_SERVER: ${{ secrets.POSTGRES_SERVER }}
