@@ -42,7 +42,7 @@ app = FastAPI(
 )
 
 app.include_router(users.router)
-# app.include_router(challenges.router)
+app.include_router(challenges.router)
 app.include_router(donations.router)
 app.include_router(posts.router)
 
