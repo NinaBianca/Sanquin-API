@@ -29,8 +29,8 @@ jobs:
       - name: Lint with black
         run: |
           # Code formatting with black, check every python file in the src directory 
-          black src
-          black --check src
+          black api
+          black --check api
 
       - name: Run Tests with GitHub Secrets
         env:
