@@ -36,4 +36,4 @@ jobs:
         env:
           POSTGRES_SERVER: ${{ secrets.POSTGRES_SERVER }}
         run: |
-          pytest api/tests/
+          pytest api/tests/ --cov=api --cov-report=term-missing
