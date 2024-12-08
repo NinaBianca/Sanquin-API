@@ -8,6 +8,8 @@ class Challenge(Base):
     __tablename__ = "challenges"
 
     id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, nullable=False)
+    description = Column(String, nullable=False)
     location = Column(String, nullable=False)
     goal = Column(Float, nullable=False)
     start = Column(DateTime, nullable=False)

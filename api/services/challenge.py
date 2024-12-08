@@ -68,10 +68,10 @@ def delete_challenge(db: Session, challenge_id: int):
     db.commit()
     return challenge
 
-def add_user_to_challenge(db: Session, challenge_user: ChallengeUser):
+def add_user_to_challenge(db: Session, challenge_id: int, user_id: int):
     new_challenge_user = ChallengeUser(
-        challenge_id=challenge_user.challenge_id,
-        user_id=challenge_user.user_id,
+        challenge_id=challenge_id,
+        user_id=user_id,
         time_created=datetime.now(tz=timezone.utc),
     )
     db.add(new_challenge_user)
