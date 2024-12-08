@@ -16,7 +16,8 @@ from ..services.user import (
     get_friend_requests,
     get_sent_requests,
     delete_friend,
-    check_user_exists
+    check_user_exists,
+    check_user_exists_by_username
 )
 from ..database import get_db
 
@@ -30,7 +31,7 @@ router = APIRouter(
 
 @router.post("/", response_model=ResponseModel)
 def create_user_route(user: UserModel, db: Session = Depends(get_db)):
-    if check_user_exists(db, user.id):
+    if check_user_exists_by_username(db, user.username):
         raise HTTPException(status_code=400, detail=f"Username '{user.username}' is already in use.")
     
     new_user = create_user(db, user).model_dump()

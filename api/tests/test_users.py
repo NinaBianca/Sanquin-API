@@ -40,7 +40,7 @@ sample_friend = {
 
 # Test for creating a user
 @patch("routers.users.create_user" , return_value=User(**sample_user))
-@patch("routers.users.check_user_exists", return_value=False)
+@patch("routers.users.check_user_exists_by_username", return_value=False)
 def test_create_user_route(create_user, user_check):
     response = client.post("/users/", json=sample_user)
     assert response.status_code == 200
@@ -48,7 +48,7 @@ def test_create_user_route(create_user, user_check):
 
 
 # Test for creating a user with duplicate username
-@patch("routers.users.check_user_exists", return_value=True)
+@patch("routers.users.check_user_exists_by_username", return_value=True)
 def test_create_user_route_duplicate(user_check):
     response = client.post("/users/", json=sample_user)
     assert response.status_code == 400

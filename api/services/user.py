@@ -11,6 +11,12 @@ def check_user_exists(db, user_id):
         return False
     return True
 
+def check_user_exists_by_username(db, username):
+    user = db.query(User).filter(User.username == username).first()
+    if not user:
+        return False
+    return True
+
 def create_user(db: Session, user: User):
     new_user = User(
         username=user.username,
