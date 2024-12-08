@@ -4,7 +4,7 @@ app = FastAPI()
 
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
-from routers import users
+from routers import users, challenges, donations, posts
 from database import SessionLocal, engine, Base
 from sqlalchemy.orm import Session
 from models.user import User
@@ -42,6 +42,10 @@ app = FastAPI(
 )
 
 app.include_router(users.router)
+# app.include_router(challenges.router)
+# app.include_router(donations.router)
+app.include_router(posts.router)
+
 
 @app.get("/")
 async def root():

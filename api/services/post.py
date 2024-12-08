@@ -6,13 +6,19 @@ from sqlalchemy import desc
 
 from models.post import Post
 from models.kudos import Kudos
+from schemas.post import PostResponse, KudosResponse
 
-def create_post(db: Session, post: Post):
-    new_post = Post(
-        title=post.title,
+def check_post_exists(db, post_id):
+    post = db.query(Post).filter(Post.id == post_id).first()
+    if not post:
+        return False
+    return True
+
+def create_post(db: Session, post: PostResponse):
+    new_post = PostResponse(
         content=post.content,
         user_id=post.user_id,
-        time_created=datetime.now(tz=timezone.utc),
+        created_at=datetime.now(tz=timezone.utc),
     )
     db.add(new_post)
     db.commit()
@@ -29,6 +35,15 @@ def get_posts_by_user_id(db: Session, user_id: int):
         raise HTTPException(
             status_code=404, detail=f"No posts found for user with ID {user_id}"
         )
+    
+    for post in posts:
+        post = PostResponse(
+            id=post.id,
+            content=post.content,
+            user_id=post.user_id,
+            created_at=post.created_at,
+        )
+        
     return posts
 
 def delete_post(db: Session, post_id: int):
@@ -41,8 +56,14 @@ def delete_post(db: Session, post_id: int):
     db.commit()
     return post
 
+def check_kudos_exists(db: Session, post_id: int, user_id: int):
+    kudos = db.query(Kudos).filter(Kudos.post_id == post_id, Kudos.user_id == user_id).first()
+    if not kudos:
+        return False
+    return True
+
 def add_kudos(db: Session, kudos: Kudos):
-    new_kudos = Kudos(
+    new_kudos = KudosResponse(
         post_id=kudos.post_id,
         user_id=kudos.user_id,
         time_created=datetime.now(tz=timezone.utc),
@@ -62,6 +83,12 @@ def get_kudos_by_post_id(db: Session, post_id: int):
         raise HTTPException(
             status_code=404, detail=f"No kudos found for post with ID {post_id}"
         )
+    for kudo in kudos:
+        kudo = KudosResponse(
+            post_id=kudo.post_id,
+            user_id=kudo.user_id,
+            time_created=kudo.created_at,
+        )
     return kudos
 
 def delete_kudos(db: Session, post_id: int, user_id: int):
@@ -79,5 +106,12 @@ def get_friends_posts(db: Session, user_id: list[int], limit: int, offset: int):
     if not posts:
         raise HTTPException(
             status_code=404, detail=f"No posts found for friends"
+        )
+    for post in posts:
+        post = PostResponse(
+            id=post.id,
+            content=post.content,
+            user_id=post.user_id,
+            created_at=post.created_at,
         )
     return posts

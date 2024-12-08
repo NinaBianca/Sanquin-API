@@ -7,6 +7,12 @@ from sqlalchemy import desc
 from models.donation import Donation
 from models.user import User
 
+def check_donation_exists(db, donation_id):
+    donation = db.query(Donation).filter(Donation.id == donation_id).first()
+    if not donation:
+        return False
+    return True
+
 def create_donation(db: Session, donation: Donation):
     new_donation = Donation(
         amount=donation.amount,

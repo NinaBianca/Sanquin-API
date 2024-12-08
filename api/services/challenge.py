@@ -7,6 +7,12 @@ from sqlalchemy import desc
 from models.challenge import Challenge
 from models.challenge_user import ChallengeUser
 
+def check_challenge_exists(db, challenge_id):
+    challenge = db.query(Challenge).filter(Challenge.id == challenge_id).first()
+    if not challenge:
+        return False
+    return True
+
 def create_challenge(db: Session, challenge: Challenge):
     new_challenge = Challenge(
         title=challenge.title,
