@@ -1,10 +1,10 @@
 from fastapi import HTTPException, APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from database import get_db
-from schemas.response import ResponseModel
-from schemas.donation import DonationCreate, DonationBase
-from services.donation import (
+from ..database import get_db
+from ..schemas.response import ResponseModel
+from ..schemas.donation import DonationCreate, DonationBase
+from ..services.donation import (
     check_donation_exists,
     create_donation,
     get_donations_by_user_id,
@@ -12,7 +12,7 @@ from services.donation import (
     update_donation,
     get_donation_by_id
 )
-from services.user import check_user_exists
+from ..services.user import check_user_exists
 
 router = APIRouter(
     prefix="/donations",
