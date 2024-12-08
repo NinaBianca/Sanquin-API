@@ -11,10 +11,10 @@ load_dotenv()
 
 # create engine
 POSTGRES_SERVER = os.getenv("POSTGRES_SERVER")
-# if not POSTGRES_SERVER:
-#     raise ValueError("POSTGRES_SERVER is not set")
+if not POSTGRES_SERVER:
+    raise ValueError("POSTGRES_SERVER is not set")
 
-engine = create_engine(os.getenv("POSTGRES_SERVER"))
+engine = create_engine(POSTGRES_SERVER)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
