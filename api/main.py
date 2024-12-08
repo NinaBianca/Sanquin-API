@@ -4,17 +4,16 @@ app = FastAPI()
 
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
-from routers import users, challenges, donations, posts
-from database import SessionLocal, engine, Base
+from .routers import users, challenges, donations, posts
+from .database import SessionLocal, engine, Base
 from sqlalchemy.orm import Session
-from models.user import User
-from models.donation import Donation
-from models.challenge import Challenge
-from models.challenge_user import ChallengeUser
-from models.kudos import Kudos
-from models.post import Post
+from .models.user import User
+from .models.donation import Donation
+from .models.challenge import Challenge
+from .models.challenge_user import ChallengeUser
+from .models.kudos import Kudos
+from .models.post import Post
 from datetime import datetime
-from fastapi import Depends
 
 Base.metadata.create_all(bind=engine)
 
