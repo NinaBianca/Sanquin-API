@@ -74,7 +74,7 @@ def delete_kudos(db: Session, post_id: int, user_id: int):
     db.commit()
     return kudos
 
-def get_friends_posts(db: Session, user_id: int[], limit: int, offset: int):
+def get_friends_posts(db: Session, user_id: list[int], limit: int, offset: int):
     posts = db.query(Post).filter(Post.user_id.in_(user_id)).order_by(desc(Post.time_created)).limit(limit).offset(offset).all()
     if not posts:
         raise HTTPException(
