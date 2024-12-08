@@ -6,10 +6,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 from unittest.mock import patch
 from fastapi.testclient import TestClient
-from main import app  # Assuming your FastAPI app is in main.py
-from models.post import Post
-from models.kudos import Kudos
-from schemas.post import PostResponse, KudosResponse
+from main import app 
 
 client = TestClient(app)
 
