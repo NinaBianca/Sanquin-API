@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Response
 from dotenv import load_dotenv
-from routers import users
+from routers import users, posts, donations, challenges
 
 try:
     load_dotenv()
@@ -17,6 +17,9 @@ app = FastAPI(
 )
 
 app.include_router(users.router)
+app.include_router(posts.router)
+app.include_router(donations.router)
+app.include_router(challenges.router)
 
 
 @app.get("/")
@@ -27,3 +30,4 @@ async def root():
         },
         status_code=200,
     )
+
