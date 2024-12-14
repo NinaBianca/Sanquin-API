@@ -1,9 +1,9 @@
 from datetime import datetime, timezone
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
-from ..models.user import User
-from ..models.friend import Friend
-from ..models.enums import FriendshipStatus
+from models.user import User
+from models.friend import Friend
+from models.enums import FriendshipStatus
 
 def check_user_exists(db, user_id):
     user = db.query(User).filter(User.id == user_id).first()
@@ -40,12 +40,18 @@ def get_user_by_id(db: Session, user_id: int):
         raise HTTPException(status_code=404, detail=f"User not found with ID {user_id}")
     return user
 
-
-def get_user_by_username(db: Session, username: str):
-    user = db.query(User).filter(User.username == username).first()
+def get_user_by_email_and_password(db: Session, email: str, password: str):
+    user = db.query(User).filter(User.email == email, User.password == password).first()
     if not user:
-        raise HTTPException(status_code=404, detail=f"User not found with username {username}")
+        raise HTTPException(status_code=404, detail=f"User not found with email and password combination")
     return user
+
+
+def get_users_by_partial_username(db: Session, username: str):
+    users = db.query(User).filter(User.username.contains(username)).all()
+    if not len(users) > 0:
+        raise HTTPException(status_code=404, detail=f"Users not found with partial username {username}")
+    return users
 
 
 def update_user(db: Session, user_id: int, user_partial):

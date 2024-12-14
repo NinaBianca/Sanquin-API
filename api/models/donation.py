@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Float, DateTime, Enum
 from datetime import datetime
 from .enums import DonationType
-from ..database import Base
+from database import Base
 
 class Donation(Base):
     __tablename__ = "donations"

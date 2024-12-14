@@ -5,6 +5,7 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import pytest
+import json
 from fastapi.testclient import TestClient
 from unittest.mock import patch
 from main import app 
@@ -70,24 +71,40 @@ def test_get_user_by_id_route_not_found():
     response = client.get("/users/999")
     assert response.status_code == 404
     assert response.json()["detail"] == "User not found with ID 999"
+    
+    
+# Test for getting a user by email and password
+@patch("routers.users.get_user_by_email_and_password" , return_value=User(**sample_user))
+def test_get_user_by_email_and_password_route(get_user_by_email_and_password):
+    email = sample_user["email"]
+    response = client.get("/users/email/{email}", params={"password":sample_user["password"]})
+    assert response.status_code == 200
+    assert response.json()["message"] == "User retrieved successfully"
+    assert response.json()["data"]["email"] == sample_user["email"]
+    
+
+# Test for getting a user by email and password when user does not exist
+def test_get_user_by_email_and_password_route_not_found():
+    email = "blup"
+    response = client.get("/users/email/{email}", params={"password":"blup"})
+    assert response.status_code == 404
+    assert response.json()["detail"] == "User not found with email and password combination"
+
 
 
 # Test for getting a user by username
-@patch("routers.users.get_user_by_username" , return_value=User(**sample_user))
-@patch("routers.users.check_user_exists", return_value=True)
-def test_get_user_by_username_route(get_user_by_username, arg):
+@patch("routers.users.get_users_by_partial_username" , return_value=[User(**sample_user)])
+def test_get_user_by_username_route(get_user_by_username):
     response = client.get(f"/users/username/{sample_user['username']}")
     assert response.status_code == 200
-    assert response.json()["message"] == "User retrieved successfully"
-    assert response.json()["data"]["username"] == sample_user["username"]
-
-
-# Test for getting a user by username when user does not exist
-@patch("routers.users.check_user_exists", return_value=False)
-def test_get_user_by_username_route_not_found(arg):
-    response = client.get("/users/username/nonexistent_user")
+    assert response.json()["message"] == "Users retrieved successfully"
+    assert response.json()["data"][0] == User(**sample_user).model_dump()
+    
+# @patch("routers.users.get_users_by_partial_username" , return_value=[])
+def test_get_user_by_username_route_not_found():
+    response = client.get(f"/users/username/unknown_user")
     assert response.status_code == 404
-    assert response.json()["detail"] == "User not found with username nonexistent_user"
+    assert response.json()["detail"] == "Users not found with partial username unknown_user"
 
 
 # Test for updating a user

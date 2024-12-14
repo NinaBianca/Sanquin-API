@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
-from ..models.user import User
-from ..models.enums import FriendshipStatus
-from ..schemas.response import ResponseModel
-from ..schemas.user import UserCollection, UserModel, UpdateUserModel
+from models.user import User
+from models.enums import FriendshipStatus
+from schemas.response import ResponseModel
+from schemas.user import UserCollection, UserModel, UpdateUserModel
 from sqlalchemy.orm import Session
-from ..services.user import (
+from services.user import (
     create_user,
     get_user_by_id,
-    get_user_by_username,
+    get_users_by_partial_username,
     update_user,
     delete_user,
     send_friend_request,
@@ -17,9 +17,10 @@ from ..services.user import (
     get_sent_requests,
     delete_friend,
     check_user_exists,
-    check_user_exists_by_username
+    check_user_exists_by_username,
+    get_user_by_email_and_password
 )
-from ..database import get_db
+from database import get_db
 
 router = APIRouter(
     prefix="/users",
@@ -46,12 +47,17 @@ def get_user_by_id_route(user_id: int, db: Session = Depends(get_db)):
     return ResponseModel(status=200, data=user, message="User retrieved successfully")
 
 
-@router.get("/username/{username}", response_model=ResponseModel)
-def get_user_by_username_route(username: str, db: Session = Depends(get_db)):
-    if not check_user_exists(db, username):
-        raise HTTPException(status_code=404, detail=f"User not found with username {username}") 
-    user = get_user_by_username(db, username).model_dump()
+@router.get("/email/{email}", response_model=ResponseModel)
+def get_user_by_email_and_password_route(email: str, password: str, db: Session = Depends(get_db)):
+    user = get_user_by_email_and_password(db, email, password).model_dump()
     return ResponseModel(status=200, data=user, message="User retrieved successfully")
+
+
+@router.get("/username/{username}", response_model=ResponseModel)
+def get_users_by_partial_username_route(username: str, db: Session = Depends(get_db)):
+    users = get_users_by_partial_username(db, username)
+    users = [user.model_dump() for user in users]
+    return ResponseModel(status=200, data=users, message="Users retrieved successfully")
 
 
 @router.put("/{user_id}", response_model=ResponseModel)

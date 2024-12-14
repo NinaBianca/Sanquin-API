@@ -2,13 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 
-from ..database import get_db
-from ..models.post import Post as PostModel
-from ..models.kudos import Kudos as KudosModel
-from ..schemas.response import ResponseModel
-from ..schemas.post import PostCreate, PostResponse, KudosCreate, KudosResponse
-from ..services.post import create_post, get_posts_by_user_id, delete_post, add_kudos, get_kudos_by_post_id, delete_kudos, get_friends_posts, check_post_exists, check_kudos_exists
-from ..services.user import check_user_exists
+from database import get_db
+from models.post import Post as PostModel
+from models.kudos import Kudos as KudosModel
+from schemas.response import ResponseModel
+from schemas.post import PostCreate, PostResponse, KudosCreate, KudosResponse
+from services.post import create_post, get_posts_by_user_id, delete_post, add_kudos, get_kudos_by_post_id, delete_kudos, get_friends_posts, check_post_exists, check_kudos_exists
+from services.user import check_user_exists
 
 router = APIRouter(
     prefix="/posts",
