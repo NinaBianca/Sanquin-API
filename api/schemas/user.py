@@ -67,4 +67,15 @@ class UpdateUserModel(BaseModel):
             "role": self.role,
             "created_at": self.created_at
         }
+        
+class LoginModel(BaseModel):
+    email: EmailStr = Field(...)
+    password: str = Field(...)
     
+class UpdateToken(BaseModel):
+    access_token: str = None
+
+
+class LoginToken(BaseModel):
+	access_token: str = None
+	refresh_token: str = None
