@@ -105,14 +105,14 @@ def test_delete_donation_route_not_found(delete_donation, check_donation_exists)
 @patch("routers.donations.update_donation", return_value=sample_update_donation)
 @patch("routers.donations.check_donation_exists", return_value=True)
 def test_update_donation_route(update_donation, check_donation_exists):
-    response = client.put("/donations/1", json=sample_update_donation)
+    response = client.put("/donations/1", json=sample_donation)
     assert response.status_code == 200
     assert response.json()["message"] == "Donation updated successfully"
 
 @patch("routers.donations.update_donation", return_value=sample_update_donation)
 @patch("routers.donations.check_donation_exists", return_value=False)
 def test_update_donation_route_not_found(update_donation, check_donation_exists):
-    response = client.put("/donations/2", json=sample_update_donation)
+    response = client.put("/donations/2", json=sample_donation)
     assert response.status_code == 404
     assert response.json()["detail"] == "Donation not found with ID 2"
 
