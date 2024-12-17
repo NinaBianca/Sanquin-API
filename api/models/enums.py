@@ -13,7 +13,8 @@ class DonationType(str, Enum):
     BLOOD = "blood"
     PLASMA = "plasma"
 
-# class PostVisibility(str, Enum):
-#     PUBLIC = "public"
-#     FRIENDS_ONLY = "friends_only"
-#     PRIVATE = "private"
+class DonationStatus(str, Enum):
+    PENDING = "pending"
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
+    CANCELLED = "cancelled"
