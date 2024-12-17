@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from datetime import datetime
 from .enums import UserRole, DonationType
 from .friend import Friend
-from database import Base
+from ..database import Base
 
 class User(Base):
     __tablename__ = "users"

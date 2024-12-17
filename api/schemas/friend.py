@@ -2,7 +2,7 @@ from typing import Optional, List
 from pydantic import BaseModel, Field, EmailStr
 from pydantic.functional_validators import BeforeValidator
 from typing_extensions import Annotated
-from models.enums import FriendshipStatus
+from ..models.enums import FriendshipStatus
 from datetime import datetime, date
 
 PyObjectId = Annotated[str, BeforeValidator(str)]
