@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
-from ..models.user import User
-from ..models.enums import FriendshipStatus
-from ..schemas.response import ResponseModel
-from ..schemas.user import UserCollection, UserModel, UpdateUserModel
+from models.user import User
+from models.enums import FriendshipStatus
+from schemas.response import ResponseModel
+from schemas.user import UserCollection, UserModel, UpdateUserModel
 from sqlalchemy.orm import Session
-from ..services.user import (
+from services.user import (
     create_user,
     get_user_by_id,
     get_users_by_partial_username,
@@ -20,7 +20,7 @@ from ..services.user import (
     check_user_exists_by_username,
     get_user_by_email_and_password
 )
-from ..database import get_db
+from database import get_db
 
 router = APIRouter(
     prefix="/users",
