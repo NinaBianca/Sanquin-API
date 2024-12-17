@@ -15,25 +15,29 @@ client = TestClient(app)
 
 # Sample user data
 sample_user = {
-    "id": 1,
+    "first_name": "Test",
+    "last_name": "User",
     "username": "test_user",
     "password": "secure_password",
     "email": "test@example.com",
     "birthdate": "2000-01-01",
     "city": "Test City",
-    "points": 100,
+    "current_points": 200,      
+    "total_points": 200,
     "role": "user",
 }
 
 # Sample friend data
 sample_friend = {
-    "id": 2,
-    "username": "friend_user",
-    "password": "friend_password",
-    "email": "friend@example.com",
-    "birthdate": "1999-01-01",
+    "first_name": "Test",
+    "last_name": "Friend",
+    "username": "test_friend",
+    "password": "secure_password",
+    "email": "friend@email.com",	
+    "birthdate": "2000-01-01",
     "city": "Friend City",
-    "points": 50,
+    "current_points": 200,
+    "total_points": 200,
     "role": "user",
 }
 
@@ -42,7 +46,8 @@ sample_friend = {
 # Test for creating a user
 @patch("routers.users.create_user" , return_value=User(**sample_user))
 @patch("routers.users.check_user_exists_by_username", return_value=False)
-def test_create_user_route(create_user, user_check):
+@patch("routers.users.check_user_exists_by_email", return_value=False)
+def test_create_user_route(create_user, user_check, email_chck):
     response = client.post("/users/", json=sample_user)
     assert response.status_code == 200
     assert response.json()["message"] == "User created successfully"
@@ -55,6 +60,13 @@ def test_create_user_route_duplicate(user_check):
     assert response.status_code == 400
     assert response.json()["detail"] == f"Username '{sample_user['username']}' is already in use."
 
+# Test for creating a user with duplicate email
+@patch("routers.users.check_user_exists_by_username", return_value=False)
+@patch("routers.users.check_user_exists_by_email", return_value=True)
+def test_create_user_route_duplicate_email(user_check, email_check):
+    response = client.post("/users/", json=sample_user)
+    assert response.status_code == 400
+    assert response.json()["detail"] == f"Email '{sample_user['email']}' is already in use."
 
 # Test for getting a user by ID
 @patch("routers.users.get_user_by_id" , return_value=User(**sample_user))
@@ -111,7 +123,7 @@ def test_get_user_by_username_route_not_found():
 @patch("routers.users.update_user" , return_value=User(**{'city': 'Updated City'}))
 @patch("routers.users.check_user_exists", return_value=True)
 def test_update_user_route(arg, update_user):
-    update_data = {"city": "Updated City"}
+    update_data = {"city": "Updated City", "id": 1}
     response = client.put("/users/1", json=update_data)
     assert response.status_code == 200
     assert response.json()["message"] == "User updated successfully"
@@ -120,7 +132,7 @@ def test_update_user_route(arg, update_user):
 
 # Test for updating a user when user does not exist
 def test_update_user_route_not_found(): 
-    update_data = {"city": "Updated City"}
+    update_data = {"city": "Updated City", "id": 999}
     response = client.put("/users/999", json=update_data)
     assert response.status_code == 404
     assert response.json()["detail"] == "User not found with ID 999"
