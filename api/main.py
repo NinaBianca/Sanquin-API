@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Response
 from dotenv import load_dotenv
-from routers import users, posts, donations, challenges
+from .routers import users, posts, donations, challenges
 
 try:
     load_dotenv()
@@ -24,10 +24,6 @@ app.include_router(challenges.router)
 
 @app.get("/")
 async def root():
-    return Response(
-        content={
-            "message": "Welcome to the Sanquin API! \n Visit /docs for the API documentation."
-        },
-        status_code=200,
-    )
+    return  "Welcome to the Sanquin API! \n Visit /docs for the API documentation."
+
 
