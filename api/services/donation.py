@@ -4,10 +4,10 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 
-from ..models.donation import Donation
-from ..models.user import User
-from ..models.location_info import LocationInfo, Timeslot
-from ..schemas.donation import LocationInfoCreate
+from models.donation import Donation
+from models.user import User
+from models.location_info import LocationInfo, Timeslot
+from schemas.donation import LocationInfoCreate
 
 def check_donation_exists(db, donation_id):
     donation = db.query(Donation).filter(Donation.id == donation_id).first()

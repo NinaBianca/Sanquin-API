@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, ForeignKey, String, func
 from sqlalchemy.ext.hybrid import hybrid_property
 from .donation import Donation
-from ..database import Base
+from database import Base
 
 class ChallengeUser(Base):
     __tablename__ = "challenge_users"

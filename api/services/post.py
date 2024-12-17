@@ -4,9 +4,9 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 
-from ..models.post import Post
-from ..models.kudos import Kudos
-from ..schemas.post import PostResponse, KudosResponse
+from models.post import Post
+from models.kudos import Kudos
+from schemas.post import PostResponse, KudosResponse
 
 def check_post_exists(db, post_id):
     post = db.query(Post).filter(Post.id == post_id).first()

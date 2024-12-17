@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
-from ..models.user import User
-from ..models.enums import FriendshipStatus
-from ..schemas.response import ResponseModel
-from ..schemas.user import UserCollection, UserModel, UpdateUserModel
+from models.user import User
+from models.enums import FriendshipStatus
+from schemas.response import ResponseModel
+from schemas.user import UserCollection, UserModel, UpdateUserModel
 from sqlalchemy.orm import Session
-from ..services.user import (
+from services.user import (
     create_user,
     get_user_by_id,
     get_users_by_partial_username,
@@ -18,9 +18,10 @@ from ..services.user import (
     delete_friend,
     check_user_exists,
     check_user_exists_by_username,
+    check_user_exists_by_email,
     get_user_by_email_and_password
 )
-from ..database import get_db
+from database import get_db
 
 router = APIRouter(
     prefix="/users",
@@ -34,6 +35,9 @@ router = APIRouter(
 def create_user_route(user: UserModel, db: Session = Depends(get_db)):
     if check_user_exists_by_username(db, user.username):
         raise HTTPException(status_code=400, detail=f"Username '{user.username}' is already in use.")
+    
+    if check_user_exists_by_email(db, user.email):
+        raise HTTPException(status_code=400, detail=f"Email '{user.email}' is already in use.")
     
     new_user = create_user(db, user).model_dump()
     return ResponseModel(status=200, data=new_user, message="User created successfully")

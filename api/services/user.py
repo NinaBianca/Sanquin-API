@@ -1,9 +1,9 @@
 from datetime import datetime, timezone
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
-from ..models.user import User
-from ..models.friend import Friend
-from ..models.enums import FriendshipStatus
+from models.user import User
+from models.friend import Friend
+from models.enums import FriendshipStatus
 
 def check_user_exists(db, user_id):
     user = db.query(User).filter(User.id == user_id).first()
@@ -17,14 +17,23 @@ def check_user_exists_by_username(db, username):
         return False
     return True
 
+def check_user_exists_by_email(db, email):
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        return False
+    return True
+
 def create_user(db: Session, user: User):
     new_user = User(
+        first_name=user.first_name,
+        last_name=user.last_name,
         username=user.username,
-        password=user.password,
         email=user.email,
+        password=user.password,
         birthdate=user.birthdate,
         city=user.city,
-        points=user.points,
+        current_points=user.current_points,
+        total_points=user.total_points,
         role=user.role,
         created_at=datetime.now(tz=timezone.utc),
     )
