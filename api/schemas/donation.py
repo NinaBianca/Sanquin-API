@@ -5,7 +5,6 @@ from ..models.enums import DonationType, DonationStatus
 
 
 class Timeslot(BaseModel):
-    location_id: int = Field(...)
     start_time: datetime = Field(...)
     end_time: datetime = Field(...)
     total_capacity: int = Field(...)
@@ -17,7 +16,7 @@ class LocationInfoBase(BaseModel):
     opening_hours: str = Field(...)
     latitude: str = Field(...)
     longitude: str = Field(...)
-    timeslots: Optional[List[Timeslot]] = Field(...)
+    timeslots: List[Timeslot] = Field(...)
 
 class LocationInfoCreate(LocationInfoBase):
     pass
