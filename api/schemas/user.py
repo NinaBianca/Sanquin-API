@@ -16,6 +16,10 @@ class UserModel(BaseModel):
     password: str = Field(...)
     birthdate: date = Field(...)
     city: str = Field(...)
+    blood_type: Optional[str] = Field(None)
+    nationality: Optional[str] = Field(None)
+    gender: Optional[str] = Field(None)
+    is_eligible: Optional[bool] = Field(default=False)
     current_points: int = Field(default=200)
     total_points: int = Field(default=200)
     role: UserRole = Field(default=UserRole.USER)
@@ -33,6 +37,10 @@ class UserModel(BaseModel):
             "password": self.password,
             "birthdate": self.birthdate,
             "city": self.city,
+            "blood_type": self.blood_type,
+            "nationality": self.nationality,
+            "gender": self.gender,
+            "is_eligible": self.is_eligible,
             "current_points": self.current_points,  
             "total_points": self.total_points,
             "role": self.role,
