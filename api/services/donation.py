@@ -17,9 +17,12 @@ def check_donation_exists(db, donation_id):
 
 def create_donation(db: Session, donation: Donation):
     new_donation = Donation(
-        amount=donation.amount,
         user_id=donation.user_id,
-        time_created=datetime.now(tz=timezone.utc),
+        location_id=donation.location_id,
+        type=donation.type,
+        amount=donation.amount,
+        appointment=donation.appointment,
+        status=donation.status
     )
     db.add(new_donation)
     db.commit()
