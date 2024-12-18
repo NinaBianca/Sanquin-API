@@ -76,8 +76,24 @@ def get_timeslots_by_location_route(city: str, db: Session = Depends(get_db)):
 @router.post("/location", response_model=ResponseModel)
 def create_location_info_route(location: LocationInfoCreate, db: Session = Depends(get_db)):
     new_location = create_location_info(db, location)
-    new_location_dict = new_location.model_dump()
-    return ResponseModel(status=200, data=LocationInfoResponse.from_attributes(**new_location_dict), message="Location created successfully")
+    new_location_dict = {
+        "id": new_location.id,
+        "name": new_location.name,
+        "address": new_location.address,
+        "opening_hours": new_location.opening_hours,
+        "latitude": new_location.latitude,
+        "longitude": new_location.longitude,
+        "timeslots": [
+            {
+                "start_time": timeslot.start_time,
+                "end_time": timeslot.end_time,
+                "total_capacity": timeslot.total_capacity,
+                "remaining_capacity": timeslot.remaining_capacity,
+            }
+            for timeslot in new_location.timeslots
+        ],
+    }
+    return ResponseModel(status=200, data=LocationInfoResponse(**new_location_dict), message="Location created successfully")
 
 @router.put("/location/{location_id}", response_model=ResponseModel)
 def update_location_info_route(location_id: int, location: LocationInfoBase, db: Session = Depends(get_db)):
