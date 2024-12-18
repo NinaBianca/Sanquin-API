@@ -9,6 +9,9 @@ class Timeslot(BaseModel):
     end_time: datetime = Field(...)
     total_capacity: int = Field(...)
     remaining_capacity: int = Field(...)
+    
+    class Config:
+        orm_mode = True
 
 class LocationInfoBase(BaseModel):
     name: str = Field(...)
@@ -17,6 +20,9 @@ class LocationInfoBase(BaseModel):
     latitude: str = Field(...)
     longitude: str = Field(...)
     timeslots: List[Timeslot] = Field(...)
+    
+    class Config:
+        orm_mode = True
 
 class LocationInfoCreate(LocationInfoBase):
     pass
@@ -36,7 +42,7 @@ class LocationInfoResponse(LocationInfoBase):
             "opening_hours": self.opening_hours,
             "latitude": self.latitude,
             "longitude": self.longitude,
-            "timeslots": self.timeslots
+            "timeslots": [timeslot.model_dump() for timeslot in self.timeslots]
         }
 
 class DonationBase(BaseModel):
