@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..schemas.response import ResponseModel
-from ..schemas.donation import DonationCreate, DonationBase, LocationInfoCreate, LocationInfoBase, LocationInfoResponse
+from ..schemas.donation import DonationCreate, DonationBase, LocationInfoCreate, LocationInfoBase, LocationInfoResponse, Timeslot
 from ..services.donation import (
     check_donation_exists,
     create_donation,
@@ -65,13 +65,42 @@ def get_donation_route(donation_id: int, db: Session = Depends(get_db)):
 
 @router.get("/location/{city}", response_model=ResponseModel)
 def get_location_info_by_city_route(city: str, db: Session = Depends(get_db)):
-    location = get_location_info_by_city(db, city)
-    return ResponseModel(status=200, data=location, message="Location(s) retrieved successfully")
+    locations = get_location_info_by_city(db, city)
+    locations_dict = [
+        {
+            "id": location.id,
+            "name": location.name,
+            "address": location.address,
+            "opening_hours": location.opening_hours,
+            "latitude": location.latitude,
+            "longitude": location.longitude,
+            "timeslots": [
+                {
+                    "start_time": timeslot.start_time,
+                    "end_time": timeslot.end_time,
+                    "total_capacity": timeslot.total_capacity,
+                    "remaining_capacity": timeslot.remaining_capacity,
+                }
+                for timeslot in location.timeslots
+            ],
+        }
+        for location in locations
+    ]
+    return ResponseModel(status=200, data=[LocationInfoResponse(**loc) for loc in locations_dict], message="Location(s) retrieved successfully")
 
 @router.get("/location/{city}/timeslots", response_model=ResponseModel)
 def get_timeslots_by_location_route(city: str, db: Session = Depends(get_db)):
     timeslots = get_timeslots_by_location_id(db, city)
-    return ResponseModel(status=200, data=timeslots, message="Timeslots retrieved successfully")
+    timeslots_dict = [
+        {
+            "start_time": timeslot.start_time,
+            "end_time": timeslot.end_time,
+            "total_capacity": timeslot.total_capacity,
+            "remaining_capacity": timeslot.remaining_capacity,
+        }
+        for timeslot in timeslots
+    ]
+    return ResponseModel(status=200, data=[Timeslot(**ts) for ts in timeslots_dict], message="Timeslots retrieved successfully")
 
 @router.post("/location", response_model=ResponseModel)
 def create_location_info_route(location: LocationInfoCreate, db: Session = Depends(get_db)):
@@ -98,7 +127,24 @@ def create_location_info_route(location: LocationInfoCreate, db: Session = Depen
 @router.put("/location/{location_id}", response_model=ResponseModel)
 def update_location_info_route(location_id: int, location: LocationInfoBase, db: Session = Depends(get_db)):
     updated_location = update_location_info(db, location_id, location)
-    return ResponseModel(status=200, data=updated_location, message="Location updated successfully")
+    updated_location_dict = {
+        "id": updated_location.id,
+        "name": updated_location.name,
+        "address": updated_location.address,
+        "opening_hours": updated_location.opening_hours,
+        "latitude": updated_location.latitude,
+        "longitude": updated_location.longitude,
+        "timeslots": [
+            {
+                "start_time": timeslot.start_time,
+                "end_time": timeslot.end_time,
+                "total_capacity": timeslot.total_capacity,
+                "remaining_capacity": timeslot.remaining_capacity,
+            }
+            for timeslot in updated_location.timeslots
+        ],
+    }
+    return ResponseModel(status=200, data=LocationInfoResponse(**updated_location_dict), message="Location updated successfully")
 
 @router.delete("/location/{location_id}", response_model=ResponseModel)
 def delete_location_info_route(location_id: int, db: Session = Depends(get_db)):
