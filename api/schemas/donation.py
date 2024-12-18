@@ -10,6 +10,14 @@ class Timeslot(BaseModel):
     total_capacity: int = Field(...)
     remaining_capacity: int = Field(...)
     
+    def model_dump(self):
+        return {
+            "start_time": self.start_time,
+            "end_time": self.end_time,
+            "total_capacity": self.total_capacity,
+            "remaining_capacity": self.remaining_capacity
+        }
+    
     class Config:
         from_attributes = True
 

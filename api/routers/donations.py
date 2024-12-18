@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..schemas.response import ResponseModel
-from ..schemas.donation import DonationCreate, DonationBase, LocationInfoCreate, LocationInfoBase
+from ..schemas.donation import DonationCreate, DonationBase, LocationInfoCreate, LocationInfoBase, LocationInfoResponse
 from ..services.donation import (
     check_donation_exists,
     create_donation,
@@ -76,7 +76,7 @@ def get_timeslots_by_location_route(city: str, db: Session = Depends(get_db)):
 @router.post("/location", response_model=ResponseModel)
 def create_location_info_route(location: LocationInfoCreate, db: Session = Depends(get_db)):
     new_location = create_location_info(db, location)
-    return ResponseModel(status=200, data=new_location.model_dump(), message="Location created successfully")
+    return ResponseModel(status=200, data=LocationInfoResponse.from_attributes(new_location), message="Location created successfully")
 
 @router.put("/location/{location_id}", response_model=ResponseModel)
 def update_location_info_route(location_id: int, location: LocationInfoBase, db: Session = Depends(get_db)):
