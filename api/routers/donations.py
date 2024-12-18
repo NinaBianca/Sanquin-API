@@ -15,7 +15,8 @@ from ..services.donation import (
     update_location_info,
     delete_location_info,
     get_location_info_by_city,
-    get_timeslots_by_location_id
+    get_timeslots_by_location_id,
+    get_all_location_info
     
 )
 from ..services.user import check_user_exists
@@ -62,6 +63,31 @@ def get_donation_route(donation_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail=f"Donation not found with ID {donation_id}")
     donation = get_donation_by_id(db, donation_id)
     return ResponseModel(status=200, data=donation, message="Donation retrieved successfully")
+
+@router.get("/location", response_model=ResponseModel)
+def get_all_location_info_route(db: Session = Depends(get_db)):
+    locations = get_all_location_info(db)
+    locations_dict = [
+        {
+            "id": location.id,
+            "name": location.name,
+            "address": location.address,
+            "opening_hours": location.opening_hours,
+            "latitude": location.latitude,
+            "longitude": location.longitude,
+            "timeslots": [
+                {
+                    "start_time": timeslot.start_time,
+                    "end_time": timeslot.end_time,
+                    "total_capacity": timeslot.total_capacity,
+                    "remaining_capacity": timeslot.remaining_capacity,
+                }
+                for timeslot in location.timeslots
+            ],
+        }
+        for location in locations
+    ]
+    return ResponseModel(status=200, data=[LocationInfoResponse(**loc) for loc in locations_dict], message="Location(s) retrieved successfully")
 
 @router.get("/location/{city}", response_model=ResponseModel)
 def get_location_info_by_city_route(city: str, db: Session = Depends(get_db)):

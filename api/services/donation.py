@@ -70,6 +70,14 @@ def get_donation_by_id(db: Session, donation_id: int):
         )
     return donation
 
+def get_all_location_info(db: Session):
+    locations = db.query(LocationInfo).all()
+    if not locations:
+        raise HTTPException(
+            status_code=404, detail=f"No locations found"
+        )
+    return locations
+
 def get_location_info_by_city(db: Session, city: str):
     location = db.query(LocationInfo).filter(LocationInfo.address.contains(city)).all()
     if not len(location) > 0:
