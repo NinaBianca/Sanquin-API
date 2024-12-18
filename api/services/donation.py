@@ -93,16 +93,24 @@ def create_location_info(db: Session, location_info: LocationInfoCreate):
         opening_hours=location_info.opening_hours,
         latitude=location_info.latitude,
         longitude=location_info.longitude,
-        timeslots=[Timeslot(
-            start_time=timeslot.start_time,
-            end_time=timeslot.end_time,
-            total_capacity=timeslot.total_capacity,
-            remaining_capacity=timeslot.remaining_capacity
-        ) for timeslot in location_info.timeslots]
     )
     db.add(new_location)
     db.commit()
     db.refresh(new_location)
+
+    for timeslot in location_info.timeslots:
+        new_timeslot = Timeslot(
+            location_id=new_location.id,
+            start_time=timeslot.start_time,
+            end_time=timeslot.end_time,
+            total_capacity=timeslot.total_capacity,
+            remaining_capacity=timeslot.remaining_capacity,
+        )
+        db.add(new_timeslot)
+
+    db.commit()
+    db.refresh(new_location)
+
     if not new_location:
         raise HTTPException(
             status_code=400, detail="Location could not be created"
