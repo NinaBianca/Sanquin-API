@@ -54,7 +54,7 @@ class LocationInfoResponse(LocationInfoBase):
         }
 
 class DonationBase(BaseModel):
-    amount: float = Field(...)
+    amount: Optional[float] = Field(...)
     user_id: int = Field(...)
     location_id: int = Field(...)
     type: DonationType = Field(...)

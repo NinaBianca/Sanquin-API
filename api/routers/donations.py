@@ -28,8 +28,8 @@ router = APIRouter(
 
 @router.post("/", response_model=ResponseModel)
 def create_new_donation(donation: DonationCreate, db: Session = Depends(get_db)):
-    if not donation.amount or not donation.user_id:
-        raise HTTPException(status_code=400, detail="Amount and user_id are required to create a donation")
+    if not donation.user_id:
+        raise HTTPException(status_code=400, detail="User_id is required to create a donation")
     if not check_user_exists(db, donation.user_id):
         raise HTTPException(status_code=404, detail=f"User not found with ID {donation.user_id}")
     

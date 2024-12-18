@@ -10,7 +10,7 @@ class Donation(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     location_id = Column(Integer, ForeignKey("location_info.id"))
     type = Column(Enum(DonationType), nullable=False)
-    amount = Column(Float, nullable=False)
+    amount = Column(Float, nullable=True, default=0.0)
     appointment = Column(DateTime, nullable=False, default=datetime.now(UTC))
     status = Column(String, nullable=False)
 
