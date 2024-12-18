@@ -34,14 +34,37 @@ def create_new_donation(donation: DonationCreate, db: Session = Depends(get_db))
         raise HTTPException(status_code=404, detail=f"User not found with ID {donation.user_id}")
     
     new_donation = create_donation(db=db, donation=donation)
-    return ResponseModel(status=200, data=new_donation, message="Donation created successfully")
+    new_donation_dict = {
+        "id": new_donation.id,
+        "user_id": new_donation.user_id,
+        "location_id": new_donation.location_id,
+        "type": new_donation.type,
+        "amount": new_donation.amount,
+        "appointment": new_donation.appointment,
+        "status": new_donation.status,
+    }
+    return ResponseModel(status=200, data=new_donation_dict, message="Donation created successfully")
+
 
 @router.get("/user/{user_id}", response_model=ResponseModel)
 def read_donations_by_user_id(user_id: int, db: Session = Depends(get_db)):
     if not check_user_exists(db, user_id):
         raise HTTPException(status_code=404, detail=f"User not found with ID {user_id}")
     donations = get_donations_by_user_id(db=db, user_id=user_id)
-    return ResponseModel(status=200, data=donations, message="Donations retrieved successfully")
+    donations_list = [
+        {
+            "id": donation.id,
+            "user_id": donation.user_id,
+            "location_id": donation.location_id,
+            "type": donation.type,
+            "amount": donation.amount,
+            "appointment": donation.appointment,
+            "status": donation.status,
+        }
+        for donation in donations
+    ]
+    return ResponseModel(status=200, data=donations_list, message="Donations retrieved successfully")
+
 
 @router.delete("/{donation_id}", response_model=ResponseModel)
 def remove_donation(donation_id: int, db: Session = Depends(get_db)):
@@ -62,7 +85,16 @@ def get_donation_route(donation_id: int, db: Session = Depends(get_db)):
     if not check_donation_exists(db, donation_id):
         raise HTTPException(status_code=404, detail=f"Donation not found with ID {donation_id}")
     donation = get_donation_by_id(db, donation_id)
-    return ResponseModel(status=200, data=donation, message="Donation retrieved successfully")
+    donation_dict = {
+        "id": donation.id,
+        "user_id": donation.user_id,
+        "location_id": donation.location_id,
+        "type": donation.type,
+        "amount": donation.amount,
+        "appointment": donation.appointment,
+        "status": donation.status,
+    }
+    return ResponseModel(status=200, data=donation_dict, message="Donation retrieved successfully")
 
 @router.get("/location/all", response_model=ResponseModel)
 def get_all_location_info_route(db: Session = Depends(get_db)):
