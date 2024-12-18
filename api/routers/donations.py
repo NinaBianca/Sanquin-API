@@ -10,7 +10,13 @@ from ..services.donation import (
     get_donations_by_user_id,
     delete_donation,
     update_donation,
-    get_donation_by_id
+    get_donation_by_id,
+    create_location_info,
+    update_location_info,
+    delete_location_info,
+    get_location_info_by_city,
+    get_timeslots_by_location_id
+    
 )
 from ..services.user import check_user_exists
 
@@ -58,26 +64,26 @@ def get_donation_route(donation_id: int, db: Session = Depends(get_db)):
     return ResponseModel(status=200, data=donation, message="Donation retrieved successfully")
 
 @router.get("/location/{city}", response_model=ResponseModel)
-def get_location_info_by_city(city: str, db: Session = Depends(get_db)):
+def get_location_info_by_city_route(city: str, db: Session = Depends(get_db)):
     location = get_location_info_by_city(db, city)
     return ResponseModel(status=200, data=location, message="Location(s) retrieved successfully")
 
 @router.get("/location/{city}/timeslots", response_model=ResponseModel)
-def get_timeslots_by_location(city: str, db: Session = Depends(get_db)):
-    timeslots = get_timeslots_by_location(db, city)
+def get_timeslots_by_location_route(city: str, db: Session = Depends(get_db)):
+    timeslots = get_timeslots_by_location_id(db, city)
     return ResponseModel(status=200, data=timeslots, message="Timeslots retrieved successfully")
 
 @router.post("/location", response_model=ResponseModel)
-def create_location_info(location: LocationInfoCreate, db: Session = Depends(get_db)):
+def create_location_info_route(location: LocationInfoCreate, db: Session = Depends(get_db)):
     new_location = create_location_info(db, location)
     return ResponseModel(status=200, data=new_location, message="Location created successfully")
 
 @router.put("/location/{location_id}", response_model=ResponseModel)
-def update_location_info(location_id: int, location: LocationInfoBase, db: Session = Depends(get_db)):
+def update_location_info_route(location_id: int, location: LocationInfoBase, db: Session = Depends(get_db)):
     updated_location = update_location_info(db, location_id, location)
     return ResponseModel(status=200, data=updated_location, message="Location updated successfully")
 
 @router.delete("/location/{location_id}", response_model=ResponseModel)
-def delete_location_info(location_id: int, db: Session = Depends(get_db)):
+def delete_location_info_route(location_id: int, db: Session = Depends(get_db)):
     delete_location_info(db, location_id)
     return ResponseModel(status=200, message="Location deleted successfully")
