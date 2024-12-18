@@ -11,7 +11,7 @@ class Timeslot(BaseModel):
     remaining_capacity: int = Field(...)
     
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class LocationInfoBase(BaseModel):
     name: str = Field(...)
@@ -22,7 +22,7 @@ class LocationInfoBase(BaseModel):
     timeslots: List[Timeslot] = Field(...)
     
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class LocationInfoCreate(LocationInfoBase):
     pass
