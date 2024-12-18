@@ -64,7 +64,7 @@ def get_donation_route(donation_id: int, db: Session = Depends(get_db)):
     donation = get_donation_by_id(db, donation_id)
     return ResponseModel(status=200, data=donation, message="Donation retrieved successfully")
 
-@router.get("/location", response_model=ResponseModel)
+@router.get("/location/all", response_model=ResponseModel)
 def get_all_location_info_route(db: Session = Depends(get_db)):
     locations = get_all_location_info(db)
     locations_dict = [
