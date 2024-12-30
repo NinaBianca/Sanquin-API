@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, Float, DateTime, func
 from sqlalchemy.ext.hybrid import hybrid_property
 from .challenge_user import ChallengeUser
 from .donation import Donation
-from database import Base
+from ..database import Base
 
 class Challenge(Base):
     __tablename__ = "challenges"

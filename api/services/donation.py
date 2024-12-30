@@ -4,10 +4,10 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 
-from models.donation import Donation
-from models.user import User
-from models.location_info import LocationInfo, Timeslot
-from schemas.donation import LocationInfoCreate
+from ..models.donation import Donation
+from ..models.user import User
+from ..models.location_info import LocationInfo, Timeslot
+from ..schemas.donation import LocationInfoCreate
 
 def check_donation_exists(db, donation_id):
     donation = db.query(Donation).filter(Donation.id == donation_id).first()
@@ -17,9 +17,12 @@ def check_donation_exists(db, donation_id):
 
 def create_donation(db: Session, donation: Donation):
     new_donation = Donation(
-        amount=donation.amount,
         user_id=donation.user_id,
-        time_created=datetime.now(tz=timezone.utc),
+        location_id=donation.location_id,
+        type=donation.type,
+        amount=donation.amount,
+        appointment=donation.appointment,
+        status=donation.status
     )
     db.add(new_donation)
     db.commit()
@@ -70,6 +73,14 @@ def get_donation_by_id(db: Session, donation_id: int):
         )
     return donation
 
+def get_all_location_info(db: Session):
+    locations = db.query(LocationInfo).all()
+    if not locations:
+        raise HTTPException(
+            status_code=404, detail=f"No locations found"
+        )
+    return locations
+
 def get_location_info_by_city(db: Session, city: str):
     location = db.query(LocationInfo).filter(LocationInfo.address.contains(city)).all()
     if not len(location) > 0:
@@ -93,12 +104,24 @@ def create_location_info(db: Session, location_info: LocationInfoCreate):
         opening_hours=location_info.opening_hours,
         latitude=location_info.latitude,
         longitude=location_info.longitude,
-        timeslots=location_info.timeslots
-
     )
     db.add(new_location)
     db.commit()
     db.refresh(new_location)
+
+    for timeslot in location_info.timeslots:
+        new_timeslot = Timeslot(
+            location_id=new_location.id,
+            start_time=timeslot.start_time,
+            end_time=timeslot.end_time,
+            total_capacity=timeslot.total_capacity,
+            remaining_capacity=timeslot.remaining_capacity,
+        )
+        db.add(new_timeslot)
+
+    db.commit()
+    db.refresh(new_location)
+
     if not new_location:
         raise HTTPException(
             status_code=400, detail="Location could not be created"

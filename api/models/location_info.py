@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, Text, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
-from database import Base
+from ..database import Base
 
 class Config:
     arbitrary_types_allowed = True

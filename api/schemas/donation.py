@@ -1,15 +1,25 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import List, Optional
-from models.enums import DonationType, DonationStatus
+from ..models.enums import DonationType, DonationStatus
 
 
 class Timeslot(BaseModel):
-    location_id: int = Field(...)
     start_time: datetime = Field(...)
     end_time: datetime = Field(...)
     total_capacity: int = Field(...)
     remaining_capacity: int = Field(...)
+    
+    def model_dump(self):
+        return {
+            "start_time": self.start_time,
+            "end_time": self.end_time,
+            "total_capacity": self.total_capacity,
+            "remaining_capacity": self.remaining_capacity
+        }
+    
+    class Config:
+        from_attributes = True
 
 class LocationInfoBase(BaseModel):
     name: str = Field(...)
@@ -17,7 +27,10 @@ class LocationInfoBase(BaseModel):
     opening_hours: str = Field(...)
     latitude: str = Field(...)
     longitude: str = Field(...)
-    timeslots: Optional[List[Timeslot]] = Field(...)
+    timeslots: List[Timeslot] = Field(...)
+    
+    class Config:
+        from_attributes = True
 
 class LocationInfoCreate(LocationInfoBase):
     pass
@@ -37,11 +50,11 @@ class LocationInfoResponse(LocationInfoBase):
             "opening_hours": self.opening_hours,
             "latitude": self.latitude,
             "longitude": self.longitude,
-            "timeslots": self.timeslots
+            "timeslots": [timeslot.model_dump() for timeslot in self.timeslots]
         }
 
 class DonationBase(BaseModel):
-    amount: float = Field(...)
+    amount: Optional[float] = Field(...)
     user_id: int = Field(...)
     location_id: int = Field(...)
     type: DonationType = Field(...)

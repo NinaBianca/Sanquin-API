@@ -1,9 +1,9 @@
-from sqlalchemy import Column, Integer, String, DateTime, Enum
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, Enum
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from .enums import UserRole, DonationType
 from .friend import Friend
-from database import Base
+from ..database import Base
 
 class User(Base):
     __tablename__ = "users"
@@ -18,6 +18,11 @@ class User(Base):
     
     birthdate = Column(DateTime, nullable=False)
     city = Column(String, nullable=False)
+    
+    blood_type = Column(String, nullable=True)
+    nationality = Column(String, nullable=True)
+    gender = Column(String, nullable=True)
+    is_eligible = Column(Boolean, nullable=True, default=False)
     
     current_points = Column(Integer, default=200)
     total_points = Column(Integer, default=200)
