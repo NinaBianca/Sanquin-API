@@ -1,10 +1,10 @@
 from fastapi import HTTPException, APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from ..database import get_db
-from ..schemas.response import ResponseModel
-from ..schemas.donation import DonationCreate, DonationBase, LocationInfoCreate, LocationInfoBase, LocationInfoResponse, Timeslot
-from ..services.donation import (
+from database import get_db
+from schemas.response import ResponseModel
+from schemas.donation import DonationCreate, DonationBase, LocationInfoCreate, LocationInfoBase, LocationInfoResponse, Timeslot
+from services.donation import (
     check_donation_exists,
     create_donation,
     get_donations_by_user_id,
@@ -19,7 +19,7 @@ from ..services.donation import (
     get_all_location_info
     
 )
-from ..services.user import check_user_exists
+from services.user import check_user_exists
 
 router = APIRouter(
     prefix="/donations",
@@ -38,7 +38,7 @@ def create_new_donation(donation: DonationCreate, db: Session = Depends(get_db))
         "id": new_donation.id,
         "user_id": new_donation.user_id,
         "location_id": new_donation.location_id,
-        "type": new_donation.type,
+        "type": new_donation.donation_type,
         "amount": new_donation.amount,
         "appointment": new_donation.appointment,
         "status": new_donation.status,
@@ -56,7 +56,7 @@ def read_donations_by_user_id(user_id: int, db: Session = Depends(get_db)):
             "id": donation.id,
             "user_id": donation.user_id,
             "location_id": donation.location_id,
-            "type": donation.type,
+            "type": donation.donation_type,
             "amount": donation.amount,
             "appointment": donation.appointment,
             "status": donation.status,
@@ -89,7 +89,7 @@ def get_donation_route(donation_id: int, db: Session = Depends(get_db)):
         "id": donation.id,
         "user_id": donation.user_id,
         "location_id": donation.location_id,
-        "type": donation.type,
+        "type": donation.donation_type,
         "amount": donation.amount,
         "appointment": donation.appointment,
         "status": donation.status,

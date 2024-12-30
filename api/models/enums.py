@@ -15,6 +15,11 @@ class DonationType(str, Enum):
 
 class DonationStatus(str, Enum):
     PENDING = "pending"
-    ACCEPTED = "accepted"
-    REJECTED = "rejected"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
+    
+class ChallengeStatus(str, Enum):
+    PENDING = "pending"
+    ACTIVE = "active"
+    COMPLETED = "completed"
     CANCELLED = "cancelled"
