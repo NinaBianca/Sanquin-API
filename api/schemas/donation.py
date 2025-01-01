@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
 from typing import List, Optional
 from models.enums import DonationType, DonationStatus
@@ -10,6 +10,8 @@ class Timeslot(BaseModel):
     total_capacity: int = Field(...)
     remaining_capacity: int = Field(...)
     
+    model_config = ConfigDict(from_attributes=True)
+    
     def model_dump(self):
         return {
             "start_time": self.start_time,
@@ -18,8 +20,19 @@ class Timeslot(BaseModel):
             "remaining_capacity": self.remaining_capacity
         }
     
-    class Config:
-        from_attributes = True
+    
+        
+class TimeslotResponse(Timeslot):
+    id: int = Field(...)
+    
+    def model_dump(self):
+        return {
+            "id": self.id,
+            "start_time": self.start_time,
+            "end_time": self.end_time,
+            "total_capacity": self.total_capacity,
+            "remaining_capacity": self.remaining_capacity
+        }
 
 class LocationInfoBase(BaseModel):
     name: str = Field(...)
@@ -29,8 +42,7 @@ class LocationInfoBase(BaseModel):
     longitude: str = Field(...)
     timeslots: List[Timeslot] = Field(...)
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class LocationInfoCreate(LocationInfoBase):
     pass
@@ -50,16 +62,18 @@ class LocationInfoResponse(LocationInfoBase):
             "opening_hours": self.opening_hours,
             "latitude": self.latitude,
             "longitude": self.longitude,
-            "timeslots": [timeslot.model_dump() for timeslot in self.timeslots]
+            "timeslots": self.timeslots
         }
 
 class DonationBase(BaseModel):
     amount: Optional[float] = Field(...)
     user_id: int = Field(...)
     location_id: int = Field(...)
-    type: DonationType = Field(...)
+    donation_type: DonationType = Field(...)
     appointment: datetime = Field(...)
     status: DonationStatus = Field(...)
+    
+    model_config = ConfigDict(from_attributes=True)
 
 class DonationCreate(DonationBase):
     pass
@@ -77,7 +91,7 @@ class DonationResponse(DonationBase):
             "amount": self.amount,
             "user_id": self.user_id,
             "location": self.location.model_dump(),
-            "type": self.type,
+            "type": self.donation_type,
             "appointment": self.appointment,
             "status": self.status
         }

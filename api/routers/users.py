@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from models.enums import FriendshipStatus
 from schemas.response import ResponseModel
 from schemas.user import UserCreate, UserUpdate, UserResponse
+from schemas.friend import FriendRequestModel
 from services.user import (
     create_user,
     get_user_by_id,
@@ -97,11 +98,14 @@ def delete_user_route(user_id: int, db: Session = Depends(get_db)):
 @router.post("/{user_id}/friends/{friend_id}", response_model=ResponseModel)
 def send_friend_request_route(user_id: int, friend_id: int, db: Session = Depends(get_db)):
     try:
+        logger.info(f"User {user_id} is sending friend request to user {friend_id}")
         friend_request = send_friend_request(db, user_id, friend_id)
-        return ResponseModel(status=200, data=friend_request, message="Friend request sent successfully")
+        return ResponseModel(status=200, data=FriendRequestModel.model_validate(friend_request), message="Friend request sent successfully")
     except HTTPException as e:
+        logger.error(f"An error occurred while sending the friend request: {e}")
         raise e
     except Exception as e:
+        logger.error(f"An error occurred while sending the friend request: {e}")
         raise HTTPException(status_code=500, detail="An error occurred while sending the friend request.") from e
 
 @router.put("/{user_id}/friends/{friend_id}", response_model=ResponseModel)
@@ -110,7 +114,7 @@ def edit_friend_request_route(user_id: int, friend_id: int, status: FriendshipSt
         print(f"User {user_id} is updating friend request with user {friend_id} to status {status}")
         logger.info(f"User {user_id} is updating friend request with user {friend_id} to status {status}")
         updated_request = edit_friend_request(db, user_id, friend_id, status)
-        return ResponseModel(status=200, data=updated_request, message="Friend request updated successfully")
+        return ResponseModel(status=200, data=FriendRequestModel.model_validate(updated_request), message="Friend request updated successfully")
     except HTTPException as e:
         raise e
     except Exception as e:
@@ -122,7 +126,8 @@ def edit_friend_request_route(user_id: int, friend_id: int, status: FriendshipSt
 def get_friends_route(user_id: int, db: Session = Depends(get_db)):
     try:
         friends = get_friends(db, user_id)
-        return ResponseModel(status=200, data=friends, message="Friends retrieved successfully")
+        output = [UserResponse.model_validate(friend) for friend in friends]
+        return ResponseModel(status=200, data=output, message="Friends retrieved successfully")
     except HTTPException as e:
         raise e
     except Exception as e:
@@ -132,7 +137,8 @@ def get_friends_route(user_id: int, db: Session = Depends(get_db)):
 def get_friend_requests_route(user_id: int, db: Session = Depends(get_db)):
     try:
         friend_requests = get_friend_requests(db, user_id)
-        return ResponseModel(status=200, data=friend_requests, message="Friend requests retrieved successfully")
+        output = [FriendRequestModel.model_validate(request) for request in friend_requests]
+        return ResponseModel(status=200, data=output, message="Friend requests retrieved successfully")
     except HTTPException as e:
         raise e
     except Exception as e:
@@ -142,7 +148,8 @@ def get_friend_requests_route(user_id: int, db: Session = Depends(get_db)):
 def get_sent_requests_route(user_id: int, db: Session = Depends(get_db)):
     try:
         sent_requests = get_sent_requests(db, user_id)
-        return ResponseModel(status=200, data=sent_requests, message="Sent requests retrieved successfully")
+        output = [FriendRequestModel.model_validate(request) for request in sent_requests]
+        return ResponseModel(status=200, data=output, message="Sent requests retrieved successfully")
     except HTTPException as e:
         raise e
     except Exception as e:
