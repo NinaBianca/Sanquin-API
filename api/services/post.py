@@ -15,16 +15,19 @@ def check_post_exists(db, post_id):
 def create_post(db: Session, post: PostCreate):
     try:
         new_post = Post(
+            title=post.title,
             content=post.content,
             user_id=post.user_id,
             created_at=datetime.now(tz=timezone.utc),
+            post_type=post.post_type,
         )
+        print(new_post)
         db.add(new_post)
         db.commit()
         db.refresh(new_post)     
         return new_post
     except Exception as e:
-        raise HTTPException(status_code=500, detail="An error occurred while creating the post.") from e
+        raise HTTPException(status_code=500, detail=e) from e
   
 
 def get_posts_by_user_id(db: Session, user_id: int):
@@ -36,7 +39,7 @@ def get_posts_by_user_id(db: Session, user_id: int):
             )
         return posts
     except Exception as e:
-        raise HTTPException(status_code=500, detail="An error occurred while retrieving the posts.") from e
+        raise HTTPException(status_code=500, detail=e) from e
 
 def delete_post(db: Session, post_id: int):
     try:
@@ -49,7 +52,7 @@ def delete_post(db: Session, post_id: int):
         db.commit()
         return post
     except Exception as e:
-        raise HTTPException(status_code=500, detail="An error occurred while deleting the post.") from e
+        raise HTTPException(status_code=500, detail=e) from e
 
 def check_kudos_exists(db: Session, post_id: int, user_id: int):
     return db.query(Kudos).filter(Kudos.post_id == post_id, Kudos.user_id == user_id).first() is not None
@@ -57,15 +60,15 @@ def check_kudos_exists(db: Session, post_id: int, user_id: int):
 
 def add_kudos(db: Session, kudos: Kudos):
     try:
-        if not check_kudos_exists(db, kudos.post_id, kudos.user_id):
+        if not check_post_exists(db, kudos.post_id):
             raise HTTPException(
-                status_code=404, detail=f"Kudos not found for post with ID {kudos.post_id} and user with ID {kudos.user_id}"
+                status_code=404, detail=f"Post not found with ID {kudos.post_id}"
             )
             
         new_kudos = Kudos(
             post_id=kudos.post_id,
             user_id=kudos.user_id,
-            time_created=datetime.now(tz=timezone.utc),
+            created_at=datetime.now(tz=timezone.utc),
         )
         db.add(new_kudos)
         db.commit()
@@ -76,7 +79,7 @@ def add_kudos(db: Session, kudos: Kudos):
             )
         return new_kudos
     except Exception as e:
-        raise HTTPException(status_code=500, detail="An error occurred while adding kudos.") from e
+        raise HTTPException(status_code=500, detail=e) from e
 
 def get_kudos_by_post_id(db: Session, post_id: int):
     try:
@@ -92,7 +95,7 @@ def get_kudos_by_post_id(db: Session, post_id: int):
             )
         return kudos
     except Exception as e:
-        raise HTTPException(status_code=500, detail="An error occurred while retrieving the kudos.") from e
+        raise HTTPException(status_code=500, detail=e) from e
 
 def delete_kudos(db: Session, post_id: int, user_id: int):
     try:
@@ -113,15 +116,15 @@ def delete_kudos(db: Session, post_id: int, user_id: int):
         db.commit()
         return kudos
     except Exception as e:
-        raise HTTPException(status_code=500, detail="An error occurred while deleting the kudos.") from e
+        raise HTTPException(status_code=500, detail=e) from e
 
-def get_friends_posts(db: Session, user_id: list[int], limit: int, offset: int):
+def get_friends_posts(db: Session, user_id: list[int], limit: int = 10 , offset: int = 0):
     try:
-        posts = db.query(Post).filter(Post.user_id.in_(user_id)).order_by(desc(Post.time_created)).limit(limit).offset(offset).all()
+        posts = db.query(Post).filter(Post.user_id == user_id).order_by(desc(Post.created_at)).limit(limit).offset(offset).all()
         if not posts:
             raise HTTPException(
                 status_code=404, detail=f"No posts found for friends"
             )
         return posts
     except Exception as e:
-        raise HTTPException(status_code=500, detail="An error occurred while retrieving the posts.") from e
+        raise HTTPException(status_code=500, detail=e) from e

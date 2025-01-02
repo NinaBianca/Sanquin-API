@@ -72,6 +72,7 @@ class DonationBase(BaseModel):
     donation_type: DonationType = Field(...)
     appointment: datetime = Field(...)
     status: DonationStatus = Field(...)
+    enable_joining: bool = Field(...)
     
     model_config = ConfigDict(from_attributes=True)
 
@@ -93,6 +94,7 @@ class DonationResponse(DonationBase):
             "location": self.location.model_dump(),
             "type": self.donation_type,
             "appointment": self.appointment,
-            "status": self.status
+            "status": self.status,
+            "enable_joining": self.enable_joining
         }
     

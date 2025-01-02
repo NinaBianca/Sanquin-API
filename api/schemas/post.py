@@ -14,14 +14,14 @@ class KudosCreate(KudosBase):
 
 class KudosResponse(KudosBase):
     id: int = Field(...)
-    time_created: datetime = Field(...)
+    created_at: datetime = Field(...)
 
     def model_dump(self):
         return {
             "id": self.id,
             "post_id": self.post_id,
             "user_id": self.user_id,
-            "time_created": self.time_created
+            "created_at": self.created_at
         }
         
 class PostBase(BaseModel):
@@ -38,7 +38,7 @@ class PostResponse(PostBase):
     id: int = Field(...)
     user_id: int = Field(...)
     created_at: datetime = Field(...)
-    kudos: List[KudosResponse] = Field(...)
+    kudos_list: Optional[List[KudosResponse]] = Field(...)
 
     def model_dump(self):
         return {
@@ -48,5 +48,5 @@ class PostResponse(PostBase):
             "content": self.content,
             "created_at": self.created_at,
             "post_type": self.post_type,
-            "kudos": [kudos.model_dump() for kudos in self.kudos]
+            "kudos": [kudos.model_dump() for kudos in self.kudos_list] if self.kudos_list else []
         }  

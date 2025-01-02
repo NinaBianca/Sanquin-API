@@ -35,7 +35,7 @@ def create_new_donation(donation: DonationCreate, db: Session = Depends(get_db))
         new_donation = create_donation(db=db, donation=donation)
         return ResponseModel(status=200, data=DonationResponse.model_validate(new_donation), message="Donation created successfully")
     except Exception as e:
-        raise HTTPException(status_code=500, detail="An error occurred while creating the donation.") from e
+        raise HTTPException(status_code=500, detail=f"An error occurred while creating the donation: {e}") from e
 
 @router.get("/user/{user_id}", response_model=ResponseModel)
 def read_donations_by_user_id(user_id: int, db: Session = Depends(get_db)):
@@ -46,7 +46,7 @@ def read_donations_by_user_id(user_id: int, db: Session = Depends(get_db)):
         donations_list = [DonationResponse.model_validate(donation) for donation in donations]
         return ResponseModel(status=200, data=donations_list, message="Donations retrieved successfully")
     except Exception as e:
-        raise HTTPException(status_code=500, detail="An error occurred while retrieving donations.") from e
+        raise HTTPException(status_code=500, detail=f"An error occurred while retrieving donations: {e}") from e
 
 
 @router.delete("/{donation_id}", response_model=ResponseModel)
@@ -55,7 +55,7 @@ def remove_donation(donation_id: int, db: Session = Depends(get_db)):
         delete_donation(db=db, donation_id=donation_id)
         return ResponseModel(status=200, message="Donation deleted successfully")
     except Exception as e:
-        raise HTTPException(status_code=500, detail="An error occurred while deleting the donation.") from e
+        raise HTTPException(status_code=500, detail=f"An error occurred while deleting the donation: {e}") from e
 
 @router.put("/{donation_id}", response_model=ResponseModel)
 def update_donation_route(donation_id: int, donation: DonationBase, db: Session = Depends(get_db)):
@@ -63,7 +63,7 @@ def update_donation_route(donation_id: int, donation: DonationBase, db: Session 
         updated_donation = update_donation(db, donation_id, donation)
         return ResponseModel(status=200, data=updated_donation, message="Donation updated successfully")
     except Exception as e:
-        raise HTTPException(status_code=500, detail="An error occurred while updating the donation.") from e
+        raise HTTPException(status_code=500, detail=f"An error occurred while updating the donation: {e}") from e
 
 @router.get("/{donation_id}", response_model=ResponseModel)
 def get_donation_route(donation_id: int, db: Session = Depends(get_db)):
@@ -72,7 +72,7 @@ def get_donation_route(donation_id: int, db: Session = Depends(get_db)):
         donation_dict = DonationResponse.model_validate(donation)
         return ResponseModel(status=200, data=donation_dict, message="Donation retrieved successfully")
     except Exception as e:
-        raise HTTPException(status_code=500, detail="An error occurred while retrieving the donation.") from e
+        raise HTTPException(status_code=500, detail=f"An error occurred while retrieving the donation: {e}") from e
 
 @router.get("/location/all", response_model=ResponseModel)
 def get_all_location_info_route(db: Session = Depends(get_db)):
@@ -81,7 +81,7 @@ def get_all_location_info_route(db: Session = Depends(get_db)):
         output = [LocationInfoResponse.model_validate(location) for location in locations]
         return ResponseModel(status=200, data=output, message="Location(s) retrieved successfully")
     except Exception as e:
-        raise HTTPException(status_code=500, detail="An error occurred while retrieving location information.") from e
+        raise HTTPException(status_code=500, detail=f"An error occurred while retrieving location information: {e}") from e
 
 @router.get("/location/{city}", response_model=ResponseModel)
 def get_location_info_by_city_route(city: str, db: Session = Depends(get_db)):
@@ -90,7 +90,7 @@ def get_location_info_by_city_route(city: str, db: Session = Depends(get_db)):
         output = [LocationInfoResponse.model_validate(location) for location in locations]   
         return ResponseModel(status=200, data=output, message="Location(s) retrieved successfully")
     except Exception as e:
-        raise HTTPException(status_code=500, detail="An error occurred while retrieving location information.") from e
+        raise HTTPException(status_code=500, detail=f"An error occurred while retrieving location information: {e}") from e
 
 @router.get("/location/{location_id}/timeslots", response_model=ResponseModel)
 def get_timeslots_by_location_route(location_id: str, db: Session = Depends(get_db)):
@@ -100,7 +100,7 @@ def get_timeslots_by_location_route(location_id: str, db: Session = Depends(get_
         
         return ResponseModel(status=200, data=output, message="Timeslots retrieved successfully")
     except Exception as e:
-        raise HTTPException(status_code=500, detail="An error occurred while retrieving timeslots.") from e
+        raise HTTPException(status_code=500, detail=f"An error occurred while retrieving timeslots: {e}") from e
 
 @router.post("/location", response_model=ResponseModel)
 def create_location_info_route(location: LocationInfoCreate, db: Session = Depends(get_db)):
@@ -108,7 +108,7 @@ def create_location_info_route(location: LocationInfoCreate, db: Session = Depen
         new_location = create_location_info(db, location)
         return ResponseModel(status=200, data=LocationInfoResponse.model_validate(new_location), message="Location created successfully")
     except Exception as e:
-        raise HTTPException(status_code=500, detail="An error occurred while creating the location.") from e
+        raise HTTPException(status_code=500, detail=f"An error occurred while creating the location: {e}") from e
 
 @router.put("/location/{location_id}", response_model=ResponseModel)
 def update_location_info_route(location_id: int, location: LocationInfoBase, db: Session = Depends(get_db)):
@@ -116,7 +116,7 @@ def update_location_info_route(location_id: int, location: LocationInfoBase, db:
         updated_location = update_location_info(db, location_id, location)
         return ResponseModel(status=200, data=LocationInfoResponse.model_validate(updated_location), message="Location updated successfully")
     except Exception as e:
-        raise HTTPException(status_code=500, detail="An error occurred while updating the location information.") from e
+        raise HTTPException(status_code=500, detail=f"An error occurred while updating the location information: {e}") from e
 
 @router.delete("/location/{location_id}", response_model=ResponseModel)
 def delete_location_info_route(location_id: int, db: Session = Depends(get_db)):
@@ -124,4 +124,4 @@ def delete_location_info_route(location_id: int, db: Session = Depends(get_db)):
         delete_location_info(db, location_id)
         return ResponseModel(status=200, message="Location deleted successfully")
     except Exception as e:
-        raise HTTPException(status_code=500, detail="An error occurred while deleting the location information.") from e
+        raise HTTPException(status_code=500, detail=f"An error occurred while deleting the location information: {e}") from e

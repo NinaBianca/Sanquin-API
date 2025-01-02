@@ -28,7 +28,7 @@ def create_new_post(post: PostCreate, db: Session = Depends(get_db)):
         return ResponseModel(status=200, data=PostResponse.model_validate(new_post), message="Post created successfully")
     except Exception as e:
         logger.error(f"Error creating post: {e}")
-        raise HTTPException(status_code=500, detail="An error occurred while creating the post.") from e
+        raise HTTPException(status_code=500, detail=f"An error occurred while creating the post: {e}") from e
 
 @router.get("/user/{user_id}", response_model=ResponseModel)
 def read_posts_by_user_id(user_id: int, db: Session = Depends(get_db)):
@@ -39,7 +39,7 @@ def read_posts_by_user_id(user_id: int, db: Session = Depends(get_db)):
         output = [PostResponse.model_validate(post) for post in posts]
         return ResponseModel(status=200, data=output, message="Posts retrieved successfully")
     except Exception as e:
-        raise HTTPException(status_code=500, detail="An error occurred while retrieving the posts.") from e
+        raise HTTPException(status_code=500, detail=f"An error occurred while retrieving the posts: {e}") from e
     
 @router.delete("/{post_id}", response_model=ResponseModel)
 def remove_post(post_id: int, db: Session = Depends(get_db)):
@@ -47,7 +47,7 @@ def remove_post(post_id: int, db: Session = Depends(get_db)):
         delete_post(db=db, post_id=post_id)
         return ResponseModel(status=200, message="Post deleted successfully")
     except Exception as e:
-        raise HTTPException(status_code=500, detail="An error occurred while deleting the post.") from e
+        raise HTTPException(status_code=500, detail=f"An error occurred while deleting the post: {e}") from e
     
 @router.post("/{post_id}/kudos", response_model=ResponseModel)
 def add_kudos_to_post(post_id: int, kudos: KudosCreate, db: Session = Depends(get_db)):
@@ -58,7 +58,7 @@ def add_kudos_to_post(post_id: int, kudos: KudosCreate, db: Session = Depends(ge
         add_kudos(db=db, kudos=kudos)
         return ResponseModel(status=200, message="Kudos added successfully")
     except Exception as e:
-        raise HTTPException(status_code=500, detail="An error occurred while adding kudos.") from e
+        raise HTTPException(status_code=500, detail=f"An error occurred while adding kudos: {e}") from e
     
 @router.get("/{post_id}/kudos", response_model=ResponseModel)
 def read_kudos_by_post_id(post_id: int, db: Session = Depends(get_db)):
@@ -67,7 +67,7 @@ def read_kudos_by_post_id(post_id: int, db: Session = Depends(get_db)):
         output = [KudosResponse.model_validate(kudo) for kudo in kudos]
         return ResponseModel(status=200, data=output, message="Kudos retrieved successfully")
     except Exception as e:
-        raise HTTPException(status_code=500, detail="An error occurred while retrieving the kudos.") from e
+        raise HTTPException(status_code=500, detail=f"An error occurred while retrieving the kudos: {e}") from e
     
 @router.delete("/{post_id}/kudos/{user_id}", response_model=ResponseModel)
 def remove_kudos(post_id: int, user_id: int, db: Session = Depends(get_db)):
@@ -77,7 +77,7 @@ def remove_kudos(post_id: int, user_id: int, db: Session = Depends(get_db)):
         delete_kudos(db=db, post_id=post_id, user_id=user_id)
         return ResponseModel(status=200, message="Kudos deleted successfully")
     except Exception as e:
-        raise HTTPException(status_code=500, detail="An error occurred while deleting the kudos.") from e
+        raise HTTPException(status_code=500, detail=f"An error occurred while deleting the kudos: {e}") from e
     
 @router.get("/friends/{user_id}", response_model=ResponseModel)
 def read_friends_posts(user_id: int, db: Session = Depends(get_db)):
@@ -88,4 +88,4 @@ def read_friends_posts(user_id: int, db: Session = Depends(get_db)):
         output = [PostResponse.model_validate(post) for post in posts]
         return ResponseModel(status=200, data=output, message="Friends' posts retrieved successfully")
     except Exception as e:
-        raise HTTPException(status_code=500, detail="An error occurred while retrieving the friends' posts.") from e
+        raise HTTPException(status_code=500, detail=f"An error occurred while retrieving the friends' posts: {e}") from e

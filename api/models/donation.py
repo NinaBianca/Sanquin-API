@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Float, DateTime, Enum
+from sqlalchemy import Column, Integer, Boolean, ForeignKey, Float, DateTime, Enum
 from sqlalchemy.orm import relationship
 from datetime import datetime, UTC
 from .enums import DonationType, DonationStatus
@@ -14,6 +14,7 @@ class Donation(Base):
     amount = Column(Float, nullable=True, default=0.0)
     appointment = Column(DateTime, nullable=False, default=datetime.now(UTC))
     status = Column(Enum(DonationStatus), nullable=False)
+    enable_joining = Column(Boolean, nullable=False, default=False)
 
     user = relationship("User", back_populates="donations")
     location = relationship("LocationInfo", back_populates="donations")
