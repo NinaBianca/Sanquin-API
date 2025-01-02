@@ -11,6 +11,7 @@ class Post(Base):
     title = Column(String, nullable=False)
     content = Column(Text, nullable=False)
     created_at = Column(DateTime, default=datetime.now, nullable=False)
+    post_type = Column(String, nullable=False)
 
     user = relationship("User", back_populates="created_posts")
     kudos_list = relationship("Kudos", back_populates="post", cascade="all, delete-orphan")

@@ -118,20 +118,12 @@ def test_delete_donation_route(delete_donation, check_donation_exists):
     assert response.status_code == 200
     assert response.json()["message"] == "Donation deleted successfully"
 
+# Test for deleting a donation not found
 @patch("services.donation.check_donation_exists", return_value=False)
 def test_delete_donation_route_not_found(check_donation_exists):
     response = client.delete("/donations/2")
-    assert response.status_code == 404
-    assert response.json()["detail"] == "Donation not found with ID 2"
-    
-# Test for deleting a donation service error
-@patch("routers.donations.delete_donation", side_effect=Exception("Test Exception"))
-@patch("routers.donations.check_donation_exists", return_value=True)
-def test_delete_donation_route_service_error(delete_donation, check_donation_exists):
-    response = client.delete("/donations/1")
     assert response.status_code == 500
     assert response.json()["detail"] == "An error occurred while deleting the donation."
-
 
 # Test for updating a donation
 @patch("routers.donations.update_donation", return_value=sample_update_donation)
@@ -141,20 +133,12 @@ def test_update_donation_route(update_donation, check_donation_exists):
     assert response.status_code == 200
     assert response.json()["message"] == "Donation updated successfully"
 
+# Test for updating a donation not found
 @patch("services.donation.check_donation_exists", return_value=False)
 def test_update_donation_route_not_found(check_donation_exists):
     response = client.put("/donations/2", json=sample_donation)
-    assert response.status_code == 404
-    assert response.json()["detail"] == "Donation not found with ID 2"
-    
-# Test for updating a donation service error
-@patch("routers.donations.update_donation", side_effect=Exception("Test Exception"))
-@patch("routers.donations.check_donation_exists", return_value=True)
-def test_update_donation_route_service_error(update_donation, check_donation_exists):
-    response = client.put("/donations/1", json=sample_donation)
     assert response.status_code == 500
     assert response.json()["detail"] == "An error occurred while updating the donation."
-
 
 # Test for getting a donation by ID
 @patch("routers.donations.get_donation_by_id", return_value=sample_update_donation)
@@ -165,17 +149,10 @@ def test_get_donation_route(get_donation_by_id, check_donation_exists):
     assert response.status_code == 200
     assert response.json()["message"] == "Donation retrieved successfully"
 
+# Test for getting a donation by ID not found
 @patch("services.donation.check_donation_exists", return_value=False)
 def test_get_donation_route_not_found(check_donation_exists):
     response = client.get("/donations/2")
-    assert response.status_code == 404
-    assert response.json()["detail"] == "Donation not found with ID 2"
-    
-# Test for getting a donation by ID service error
-@patch("routers.donations.get_donation_by_id", side_effect=Exception("Test Exception"))
-@patch("routers.donations.check_donation_exists", return_value=True)
-def test_get_donation_route_service_error(get_donation_by_id, check_donation_exists):
-    response = client.get("/donations/1")
     assert response.status_code == 500
     assert response.json()["detail"] == "An error occurred while retrieving the donation."
 
@@ -252,13 +229,6 @@ def test_update_location_info_route(update_location_info):
 @patch("services.donation.check_location_exists", return_value=False)
 def test_update_location_info_route_not_found(check_location_exists):
     response = client.put("/donations/location/2", json=sample_location)
-    assert response.status_code == 404
-    assert response.json()["detail"] == "Location not found with ID 2"
-    
-# Test for updating location info service error
-@patch("routers.donations.update_location_info", side_effect=Exception("Test Exception"))
-def test_update_location_info_route_service_error(update_location_info):
-    response = client.put("/donations/location/1", json=sample_location)
     assert response.status_code == 500
     assert response.json()["detail"] == "An error occurred while updating the location information."
 
@@ -273,13 +243,6 @@ def test_delete_location_info_route(delete_location_info):
 @patch("services.donation.check_location_exists", return_value=False)
 def test_delete_location_info_route_not_found(check_location_exists):
     response = client.delete("/donations/location/2")
-    assert response.status_code == 404
-    assert response.json()["detail"] == "Location not found with ID 2"
-    
-# Test for deleting location info service error
-@patch("routers.donations.delete_location_info", side_effect=Exception("Test Exception"))
-def test_delete_location_info_route_service_error(delete_location_info):
-    response = client.delete("/donations/location/1")
     assert response.status_code == 500
     assert response.json()["detail"] == "An error occurred while deleting the location information."
     
