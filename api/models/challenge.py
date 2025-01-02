@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime
+from sqlalchemy.sql import func
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 from .challenge_user import ChallengeUser

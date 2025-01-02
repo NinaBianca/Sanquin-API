@@ -26,16 +26,16 @@ class UserCreate(BaseModel):
     role: Optional[UserRole] = UserRole.USER
 
 class UserUpdate(BaseModel):
-    first_name: Optional[str]
-    last_name: Optional[str]
-    username: Optional[str]
-    email: Optional[EmailStr]
-    password: Optional[str]
-    birthdate: Optional[datetime]
-    city: Optional[str]
-    current_points: Optional[int]
-    total_points: Optional[int]
-    role: Optional[UserRole]
+    first_name: Optional[str] = Field(None)
+    last_name: Optional[str] = Field(None)
+    username: Optional[str] = Field(None)
+    email: Optional[EmailStr] = Field(None)
+    password: Optional[str] = Field(None)
+    birthdate: Optional[datetime] = Field(None)
+    city: Optional[str] = Field(None)
+    current_points: Optional[int] = Field(None)
+    total_points: Optional[int] = Field(None)
+    role: Optional[UserRole] = Field(None)
     
     model_config = ConfigDict(from_attributes=True)
 

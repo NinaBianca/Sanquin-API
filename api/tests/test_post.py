@@ -20,7 +20,7 @@ sample_kudos_response = {
     "id": 1,
     "post_id": 1,
     "user_id": 1,
-    "time_created": "2021-01-01T00:00:00+00:00"
+    "created_at": "2021-01-01T00:00:00+00:00"
 }
 
 # Sample post data
@@ -38,7 +38,7 @@ sample_post_response = {
     "user_id": 1,
     "created_at": "2021-01-01T00:00:00+00:00",
     "post_type": "text",
-    "kudos": [sample_kudos_response]
+    "kudos_list": [sample_kudos_response]
 }
 
 
@@ -64,9 +64,8 @@ def test_create_post_route_user_not_found(check_user_exists):
 @patch("routers.posts.create_post", return_value=None)
 def test_create_post_route_not_created(check_user_exists, create_post):
     response = client.post("/posts/", json=sample_post)
-    print(response.json())
     assert response.status_code == 500
-    assert response.json()["detail"] == "An error occurred while creating the post."
+    assert "An error occurred while creating the post" in response.json()["detail"]
 
 # Test for getting posts by user ID
 @patch("routers.posts.get_posts_by_user_id", return_value=[sample_post_response])
@@ -90,9 +89,8 @@ def test_get_posts_by_user_id_route_user_not_found(check_user_exists):
 @patch("routers.posts.get_posts_by_user_id", return_value=None)
 def test_get_posts_by_user_id_route_not_found(check_user_exists, get_posts_by_user_id):
     response = client.get("/posts/user/1")
-    print(response.json())
     assert response.status_code == 500
-    assert response.json()["detail"] == "An error occurred while retrieving the posts."
+    assert "An error occurred while retrieving the posts" in response.json()["detail"]
 
 # Test for deleting a post
 @patch("routers.posts.delete_post", return_value=True)
@@ -107,7 +105,7 @@ def test_delete_post_route(delete_post, check_post_exists):
 def test_delete_post_route_not_found(delete_post):
     response = client.delete("/posts/1")
     assert response.status_code == 500
-    assert response.json()["detail"] == "An error occurred while deleting the post."
+    assert "An error occurred while deleting the post" in response.json()["detail"]
 
 # Test for adding kudos to a post
 @patch("routers.posts.add_kudos", return_value=sample_kudos_response)
@@ -131,7 +129,7 @@ def test_add_kudos_route_user_not_found(check_user_exists):
 def test_add_kudos_route_not_added(check_user_exists, check_kudos_exists):
     response = client.post("/posts/1/kudos", json=sample_kudos)
     assert response.status_code == 500
-    assert response.json()["detail"] == "An error occurred while adding kudos."
+    assert "An error occurred while adding kudos" in response.json()["detail"]
 
 # Test for getting kudos by post ID
 @patch("routers.posts.get_kudos_by_post_id", return_value=[sample_kudos_response])
@@ -149,7 +147,7 @@ def test_get_kudos_by_post_id_route(get_kudos_by_post_id, check_post_exists):
 def test_get_kudos_by_post_id_route_not_found(check_post_exists, get_kudos_by_post_id):
     response = client.get("/posts/1/kudos")
     assert response.status_code == 500
-    assert response.json()["detail"] == "An error occurred while retrieving the kudos."
+    assert "An error occurred while retrieving the kudos" in response.json()["detail"]
 
 # Test for deleting kudos
 @patch("routers.posts.delete_kudos", return_value=True)
@@ -174,7 +172,7 @@ def test_delete_kudos_route_user_not_found(check_user_exists):
 def test_delete_kudos_route_not_found(check_user_exists, delete_kudos):
     response = client.delete("/posts/1/kudos/1")
     assert response.status_code == 500
-    assert response.json()["detail"] == "An error occurred while deleting the kudos."
+    assert "An error occurred while deleting the kudos" in response.json()["detail"]
 
 # Test for getting friends' posts
 @patch("routers.posts.get_friends_posts", return_value=[sample_post_response])
@@ -198,4 +196,4 @@ def test_get_friends_posts_route_user_not_found(check_user_exists):
 def test_get_friends_posts_route_not_found(check_user_exists, get_friends_posts):
     response = client.get("/posts/friends/1")
     assert response.status_code == 500
-    assert response.json()["detail"] == "An error occurred while retrieving the friends' posts."
+    assert "An error occurred while retrieving the friends' posts" in response.json()["detail"]

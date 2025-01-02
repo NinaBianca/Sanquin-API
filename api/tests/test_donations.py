@@ -48,6 +48,7 @@ sample_donation = {
     "donation_type": "blood",
     "appointment": "2021-01-01T00:00:00+00:00",
     "status": "pending",
+    "enable_joining": True,
 }
 sample_update_donation = {
     "id": 1,
@@ -57,6 +58,7 @@ sample_update_donation = {
     "donation_type": "blood",
     "appointment": "2021-01-01T00:00:00+00:00",
     "status": "completed",
+    "enable_joining": True,
 }
 
 
@@ -66,7 +68,6 @@ sample_update_donation = {
 @patch("routers.donations.check_user_exists", return_value=True)
 def test_create_donation_route(create_donation, check_user_exists):
     response = client.post("/donations/", json=sample_donation)
-    print(response.json())
     assert response.status_code == 200
     assert response.json()["message"] == "Donation created successfully"
 
@@ -83,14 +84,13 @@ def test_create_donation_route_user_not_found(get_donation_by_id, check_user_exi
 def test_create_donation_route_service_error(create_donation, check_user_exists):
     response = client.post("/donations/", json=sample_donation)
     assert response.status_code == 500
-    assert response.json()["detail"] == "An error occurred while creating the donation."
+    assert "An error occurred while creating the donation" in response.json()["detail"]
     
 # Test for getting donations by user ID
 @patch("routers.donations.get_donations_by_user_id", return_value=[sample_update_donation])
 @patch("routers.donations.check_user_exists", return_value=True)
 def test_get_donations_by_user_id_route(get_donations_by_user_id, check_user_exists):
     response = client.get("/donations/user/1")
-    print(response.json())
     assert response.status_code == 200
     assert response.json()["message"] == "Donations retrieved successfully"
 
@@ -107,7 +107,30 @@ def test_get_donations_by_user_id_route_not_found(get_donation_by_id, check_user
 def test_get_donations_by_user_id_route_service_error(get_donations_by_user_id, check_user_exists):
     response = client.get("/donations/user/1")
     assert response.status_code == 500
-    assert response.json()["detail"] == "An error occurred while retrieving donations."
+    assert "An error occurred while retrieving donations" in response.json()["detail"]
+    
+# Test for getting friends donations
+@patch("routers.donations.get_friends_donations", return_value=[sample_update_donation])
+@patch("routers.donations.check_user_exists", return_value=True)
+def test_get_friends_donations_route(get_friends_donations, check_user_exists):
+    response = client.get("/donations/user/1/friends")
+    assert response.status_code == 200
+    assert response.json()["message"] == "Friends' donations retrieved successfully"
+    
+# Test for getting friends donations user not found
+@patch("routers.donations.check_user_exists", return_value=False)
+def test_get_friends_donations_route_user_not_found(check_user_exists):
+    response = client.get("/donations/user/2/friends")
+    assert response.status_code == 404
+    assert response.json()["detail"] == "User not found with ID 2"
+    
+# Test for getting friends donations service error
+@patch("routers.donations.get_friends_donations", side_effect=Exception("Test Exception"))
+@patch("routers.donations.check_user_exists", return_value=True)
+def test_get_friends_donations_route_service_error(get_friends_donations, check_user_exists):
+    response = client.get("/donations/user/1/friends")
+    assert response.status_code == 500
+    assert "An error occurred while retrieving friends' donations" in response.json()["detail"]
 
 
 # Test for deleting a donation
@@ -123,7 +146,7 @@ def test_delete_donation_route(delete_donation, check_donation_exists):
 def test_delete_donation_route_not_found(check_donation_exists):
     response = client.delete("/donations/2")
     assert response.status_code == 500
-    assert response.json()["detail"] == "An error occurred while deleting the donation."
+    assert "An error occurred while deleting the donation" in response.json()["detail"]
 
 # Test for updating a donation
 @patch("routers.donations.update_donation", return_value=sample_update_donation)
@@ -138,14 +161,13 @@ def test_update_donation_route(update_donation, check_donation_exists):
 def test_update_donation_route_not_found(check_donation_exists):
     response = client.put("/donations/2", json=sample_donation)
     assert response.status_code == 500
-    assert response.json()["detail"] == "An error occurred while updating the donation."
+    assert "An error occurred while updating the donation" in response.json()["detail"]
 
 # Test for getting a donation by ID
 @patch("routers.donations.get_donation_by_id", return_value=sample_update_donation)
 @patch("routers.donations.check_donation_exists", return_value=True)
 def test_get_donation_route(get_donation_by_id, check_donation_exists):
     response = client.get("/donations/1")
-    print(response.json())
     assert response.status_code == 200
     assert response.json()["message"] == "Donation retrieved successfully"
 
@@ -154,14 +176,13 @@ def test_get_donation_route(get_donation_by_id, check_donation_exists):
 def test_get_donation_route_not_found(check_donation_exists):
     response = client.get("/donations/2")
     assert response.status_code == 500
-    assert response.json()["detail"] == "An error occurred while retrieving the donation."
+    assert "An error occurred while retrieving the donation" in response.json()["detail"]
 
 # --- Location Routes Tests ---
 # Test for getting all location info
 @patch("routers.donations.get_all_location_info", return_value=[sample_location_response])
 def test_get_all_location_info_route(get_all_location_info):
     response = client.get("/donations/location/all")
-    print(response.json())
     assert response.status_code == 200
     assert response.json()["message"] == "Location(s) retrieved successfully"
     
@@ -170,13 +191,12 @@ def test_get_all_location_info_route(get_all_location_info):
 def test_get_all_location_info_route_service_error(get_all_location_info):
     response = client.get("/donations/location/all")
     assert response.status_code == 500
-    assert response.json()["detail"] == "An error occurred while retrieving location information."
+    assert "An error occurred while retrieving location information" in response.json()["detail"]
     
 # Test for getting location info by city
 @patch("routers.donations.get_location_info_by_city", return_value=[sample_location_response])
 def test_get_location_info_by_city_route(get_location_info_by_city):
     response = client.get("/donations/location/Test City")
-    print(response.json())
     assert response.status_code == 200
     assert response.json()["message"] == "Location(s) retrieved successfully"
     
@@ -185,13 +205,12 @@ def test_get_location_info_by_city_route(get_location_info_by_city):
 def test_get_location_info_by_city_route_service_error(get_location_info_by_city):
     response = client.get("/donations/location/Test City")
     assert response.status_code == 500
-    assert response.json()["detail"] == "An error occurred while retrieving location information."
+    assert "An error occurred while retrieving location information" in response.json()["detail"]
 
 # Test for getting timeslots by location
 @patch("routers.donations.get_timeslots_by_location_id", return_value=[sample_timeslot_response])
 def test_get_timeslots_by_location_route(get_timeslots_by_location):
     response = client.get("/donations/location/Test City/timeslots")
-    print(response.json())
     assert response.status_code == 200
     assert response.json()["message"] == "Timeslots retrieved successfully"
     
@@ -200,13 +219,12 @@ def test_get_timeslots_by_location_route(get_timeslots_by_location):
 def test_get_timeslots_by_location_route_service_error(get_timeslots_by_location):
     response = client.get("/donations/location/Test City/timeslots")
     assert response.status_code == 500
-    assert response.json()["detail"] == "An error occurred while retrieving timeslots."
+    assert "An error occurred while retrieving timeslots" in response.json()["detail"]
 
 # Test for creating location info
 @patch("routers.donations.create_location_info", return_value=sample_location_response)
 def test_create_location_info_route(create_location_info):
     response = client.post("/donations/location", json=sample_location)
-    print(response.json())
     assert response.status_code == 200
     assert response.json()["message"] == "Location created successfully"
     
@@ -215,13 +233,12 @@ def test_create_location_info_route(create_location_info):
 def test_create_location_info_route_service_error(create_location_info):
     response = client.post("/donations/location", json=sample_location)
     assert response.status_code == 500
-    assert response.json()["detail"] == "An error occurred while creating the location."
+    assert "An error occurred while creating the location" in response.json()["detail"]
 
 # Test for updating location info
 @patch("routers.donations.update_location_info", return_value=sample_location_response)
 def test_update_location_info_route(update_location_info):
     response = client.put("/donations/location/1", json=sample_location)
-    print(response.json())
     assert response.status_code == 200
     assert response.json()["message"] == "Location updated successfully"
     
@@ -230,7 +247,7 @@ def test_update_location_info_route(update_location_info):
 def test_update_location_info_route_not_found(check_location_exists):
     response = client.put("/donations/location/2", json=sample_location)
     assert response.status_code == 500
-    assert response.json()["detail"] == "An error occurred while updating the location information."
+    assert "An error occurred while updating the location information" in response.json()["detail"]
 
 # Test for deleting location info
 @patch("routers.donations.delete_location_info", return_value=True)
@@ -244,5 +261,5 @@ def test_delete_location_info_route(delete_location_info):
 def test_delete_location_info_route_not_found(check_location_exists):
     response = client.delete("/donations/location/2")
     assert response.status_code == 500
-    assert response.json()["detail"] == "An error occurred while deleting the location information."
+    assert "An error occurred while deleting the location information" in response.json()["detail"]
     

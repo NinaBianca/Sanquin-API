@@ -3,12 +3,12 @@ from datetime import datetime, timezone
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import desc
+from sqlalchemy import desc, or_
 
 from models.donation import Donation
-from models.user import User
+from models.friend import Friend
 from models.location_info import LocationInfo, Timeslot
-from schemas.donation import LocationInfoCreate, DonationCreate
+from schemas.donation import LocationInfoCreate, DonationCreate, DonationUpdate
 
 def check_donation_exists(db, donation_id):
     return db.query(Donation).filter(Donation.id == donation_id).first() is not None
@@ -45,6 +45,19 @@ def get_donations_by_user_id(db: Session, user_id: int):
         return donations
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=e) from e
+    
+def get_friends_donations(db: Session, user_id: int):
+    try:
+        friends = db.query(Friend).filter(or_(Friend.sender_id == user_id, Friend.receiver_id == user_id), Friend.status == "accepted").all()
+        friends_donations = []
+        current_date = datetime.now(timezone.utc)
+        for friend in friends:
+            friend_id = friend.sender_id if friend.sender_id != user_id else friend.receiver_id
+            friend_donations = db.query(Donation).filter(Donation.user_id == friend_id, Donation.enable_joining == True, Donation.appointment > current_date).all()
+            friends_donations.extend(friend_donations)
+        return friends_donations
+    except SQLAlchemyError as e:
+        raise HTTPException(status_code=500, detail=e) from e
 
 def delete_donation(db: Session, donation_id: int):
     try:
@@ -64,7 +77,7 @@ def delete_donation(db: Session, donation_id: int):
         db.rollback()
         raise HTTPException(status_code=500, detail=e) from e
 
-def update_donation(db: Session, donation_id: int, donation_partial):
+def update_donation(db: Session, donation_id: int, donation_partial: DonationUpdate):
     try:
         if not check_donation_exists(db, donation_id):
             raise HTTPException(
@@ -79,7 +92,6 @@ def update_donation(db: Session, donation_id: int, donation_partial):
         for key, value in donation_data.items():
             setattr(donation, key, value)
         donation.updated_at = datetime.now(timezone.utc)
-        db.add(donation)
         db.commit()
         db.refresh(donation)
         return donation

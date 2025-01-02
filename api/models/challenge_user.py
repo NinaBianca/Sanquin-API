@@ -1,7 +1,8 @@
-from sqlalchemy import Column, Integer, ForeignKey, String, func
+from sqlalchemy import Column, Integer, ForeignKey, Enum, func
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 from .donation import Donation
+from .enums import ChallengeStatus
 from database import Base
 
 class ChallengeUser(Base):
@@ -9,7 +10,7 @@ class ChallengeUser(Base):
 
     challenge_id = Column(Integer, ForeignKey("challenges.id", ondelete="CASCADE"), primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
-    status = Column(String, nullable=False)  # 'pending', 'active', 'completed'
+    status = Column(Enum(ChallengeStatus), nullable=False)  
 
     challenge = relationship("Challenge", back_populates="participants")
     user = relationship("User", back_populates="challenges")

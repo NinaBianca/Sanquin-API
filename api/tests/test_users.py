@@ -179,7 +179,6 @@ def test_delete_user_route_not_found(check_user_exists):
 @patch("services.user.check_user_exists", return_value=True)
 def test_send_friend_request_route(check_user_exists, send_friend_request):
     response = client.post("/users/1/friends/2")
-    print(response.json())
     assert response.status_code == 200
     assert response.json()["message"] == "Friend request sent successfully"
 
@@ -195,7 +194,6 @@ def test_send_friend_request_route_user_not_found(check_user_exists):
 @patch("services.user.check_user_exists", return_value=True)
 def test_edit_friend_request_route(check_user_exists, edit_friend_request):
     response = client.put(f"/users/1/friends/2?status={FriendshipStatus.ACCEPTED.value}")
-    print(response.json())
     assert response.status_code == 200
     assert response.json()["message"] == "Friend request updated successfully"
 
@@ -227,7 +225,6 @@ def test_get_friends_route_user_not_found(check_user_exists):
 @patch("services.user.check_user_exists", return_value=True)
 def test_get_friend_requests_route(check_user_exists, get_friend_requests):
     response = client.get("/users/1/friend-requests")
-    print(response.json())
     assert response.status_code == 200
     assert response.json()["message"] == "Friend requests retrieved successfully"
 
@@ -243,7 +240,6 @@ def test_get_friend_requests_route_user_not_found(check_user_exists):
 @patch("services.user.check_user_exists", return_value=True)
 def test_get_sent_requests_route(check_user_exists, get_sent_requests):
     response = client.get("/users/1/sent-requests")
-    print(response.json())
     assert response.status_code == 200
     assert response.json()["message"] == "Sent requests retrieved successfully"
     

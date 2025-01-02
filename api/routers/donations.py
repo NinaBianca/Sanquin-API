@@ -16,7 +16,8 @@ from services.donation import (
     delete_location_info,
     get_location_info_by_city,
     get_timeslots_by_location_id,
-    get_all_location_info
+    get_all_location_info,
+    get_friends_donations
     
 )
 from services.user import check_user_exists
@@ -47,6 +48,17 @@ def read_donations_by_user_id(user_id: int, db: Session = Depends(get_db)):
         return ResponseModel(status=200, data=donations_list, message="Donations retrieved successfully")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred while retrieving donations: {e}") from e
+    
+@router.get("/user/{user_id}/friends", response_model=ResponseModel)
+def read_friends_donations(user_id: int, db: Session = Depends(get_db)):
+    if not check_user_exists(db, user_id):
+        raise HTTPException(status_code=404, detail=f"User not found with ID {user_id}")
+    try:
+        friends_donations = get_friends_donations(db, user_id)
+        friends_donations_list = [DonationResponse.model_validate(donation) for donation in friends_donations]
+        return ResponseModel(status=200, data=friends_donations_list, message="Friends' donations retrieved successfully")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred while retrieving friends' donations: {e}") from e
 
 
 @router.delete("/{donation_id}", response_model=ResponseModel)
