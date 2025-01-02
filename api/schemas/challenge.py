@@ -1,5 +1,6 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
+from typing import Optional
 
 class ChallengeBase(BaseModel):
     title: str = Field(...)
@@ -8,13 +9,23 @@ class ChallengeBase(BaseModel):
     goal: float = Field(...)
     start: datetime = Field(...)
     end: datetime = Field(...)
+    
+    model_config = ConfigDict(from_attributes=True)
 
 class ChallengeCreate(ChallengeBase):
     pass
 
+class ChallengeUpdate(BaseModel):
+    title: Optional[str] = Field(None)
+    description: Optional[str] = Field(None)
+    location: Optional[str] = Field(None)
+    goal: Optional[float] = Field(None)
+    start: Optional[datetime] = Field(None)
+    end: Optional[datetime] = Field(None)
+    
+
 class ChallengeResponse(ChallengeBase):
     id: int = Field(...)
-    total: float = Field(...)
 
     def model_dump(self):
         return {
@@ -24,8 +35,7 @@ class ChallengeResponse(ChallengeBase):
             "location": self.location,
             "goal": self.goal,
             "start": self.start,
-            "end": self.end,
-            "total": self.total 
+            "end": self.end
         }
     
 
@@ -33,19 +43,15 @@ class ChallengeUserBase(BaseModel):
     challenge_id: int = Field(...)
     user_id: int = Field(...)
     status: str = Field(...)
-    progress: float = Field(...)
 
 class ChallengeUserCreate(ChallengeUserBase):
     pass
 
 class ChallengeUserResponse(ChallengeUserBase):
-    id: int = Field(...)
 
     def model_dump(self):
         return {
-            "id": self.id,
             "challenge_id": self.challenge_id,
             "user_id": self.user_id,
-            "status": self.status,
-            "progress": self.progress
+            "status": self.status
         }
