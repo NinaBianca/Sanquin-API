@@ -119,7 +119,7 @@ def test_get_user_by_email_and_password_route(get_user_by_email_and_password):
     assert email in response.json()["data"][4]
 
 # Test for getting a user by email and password when user does not exist
-@patch("services.user.get_user_by_email_and_password", return_value=None)
+@patch("routers.users.get_user_by_email_and_password", return_value=None)
 def test_get_user_by_email_and_password_route_not_found(get_user_by_email_and_password):
     email = "unknown@example.com"
     response = client.get(f"/users/email/{email}", params={"password": "wrong_password"})
@@ -127,7 +127,7 @@ def test_get_user_by_email_and_password_route_not_found(get_user_by_email_and_pa
     assert "An error occurred while retrieving the user" in response.json()["detail"]
 
 # Test for getting a user by username
-@patch("services.user.get_users_by_partial_username", return_value=[sample_user])
+@patch("routers.users.get_users_by_partial_username", return_value=[sample_user])
 def test_get_user_by_username_route(get_users_by_partial_username):
     response = client.get(f"/users/username/{sample_user['username']}")
     assert response.status_code == 200
@@ -135,7 +135,7 @@ def test_get_user_by_username_route(get_users_by_partial_username):
     assert response.json()["data"][0]["username"] == sample_user["username"]
 
 # Test for getting a user by username when user does not exist
-@patch("services.user.get_users_by_partial_username", return_value=[])
+@patch("routers.users.get_users_by_partial_username", return_value=None)
 def test_get_user_by_username_route_not_found(get_users_by_partial_username):
     response = client.get(f"/users/username/unknown_user")
     assert response.status_code == 500
