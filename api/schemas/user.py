@@ -1,17 +1,12 @@
 from typing import Optional, List
-from pydantic import BaseModel, Field, EmailStr
 from pydantic.functional_validators import BeforeValidator
 from typing_extensions import Annotated
-from models.enums import UserRole
+from ..models.enums import UserRole
 from datetime import datetime, date
+from pydantic import BaseModel, Field, ConfigDict, EmailStr, Annotated
 
 PyObjectId = Annotated[str, BeforeValidator(str)]
 
-
-from pydantic import BaseModel, EmailStr, ConfigDict
-from datetime import datetime
-from typing import Optional
-from models.enums import UserRole
 
 class UserCreate(BaseModel):
     first_name: str
