@@ -1,8 +1,10 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, func
+from sqlalchemy import Column, Integer, String, Float, DateTime
+from sqlalchemy.sql import func
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.orm import relationship
 from .challenge_user import ChallengeUser
 from .donation import Donation
-from ..database import Base
+from database import Base
 
 class Challenge(Base):
     __tablename__ = "challenges"
@@ -14,6 +16,8 @@ class Challenge(Base):
     goal = Column(Float, nullable=False)
     start = Column(DateTime, nullable=False)
     end = Column(DateTime, nullable=False)
+
+    participants = relationship("ChallengeUser", back_populates="challenge", cascade="all, delete-orphan")
 
     # Hybrid property to calculate total contributions (participant donations)
     @hybrid_property

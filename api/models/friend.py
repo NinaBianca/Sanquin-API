@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, DateTime, ForeignKey, Enum
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from .enums import FriendshipStatus
-from ..database import Base
+from database import Base
 
 class Friend(Base):
     __tablename__ = "friends"
@@ -12,5 +12,5 @@ class Friend(Base):
     created_at = Column(DateTime, default=datetime.now)
     status = Column(Enum(FriendshipStatus), default=FriendshipStatus.PENDING)
 
-    sender = relationship("User", foreign_keys=[sender_id])
-    receiver = relationship("User", foreign_keys=[receiver_id])
+    sender = relationship("User", foreign_keys=[sender_id], back_populates="sent_requests")
+    receiver = relationship("User", foreign_keys=[receiver_id], back_populates="received_requests")

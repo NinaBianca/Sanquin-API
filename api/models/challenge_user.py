@@ -1,14 +1,19 @@
-from sqlalchemy import Column, Integer, ForeignKey, String, func
+from sqlalchemy import Column, Integer, ForeignKey, Enum, func
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.orm import relationship
 from .donation import Donation
-from ..database import Base
+from .enums import ChallengeStatus
+from database import Base
 
 class ChallengeUser(Base):
     __tablename__ = "challenge_users"
 
-    challenge_id = Column(Integer, ForeignKey("challenges.id"), primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
-    status = Column(String, nullable=False)  # 'pending', 'active', 'completed'
+    challenge_id = Column(Integer, ForeignKey("challenges.id", ondelete="CASCADE"), primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    status = Column(Enum(ChallengeStatus), nullable=False)  
+
+    challenge = relationship("Challenge", back_populates="participants")
+    user = relationship("User", back_populates="challenges")
 
     # Hybrid property for calculating the user's total donations during the challenge period
     @hybrid_property
