@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Response
 from dotenv import load_dotenv
-from routers import users, posts, donations, challenges
+from .routers import users, posts, donations, challenges
 
 try:
     load_dotenv()

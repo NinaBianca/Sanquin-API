@@ -2,16 +2,14 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 
-from database import get_db
-from models.post import Post as PostModel
-from models.kudos import Kudos as KudosModel
-from schemas.response import ResponseModel
-from schemas.post import PostCreate, PostResponse, KudosCreate, KudosResponse
-from services.post import create_post, get_posts_by_user_id, delete_post, add_kudos, get_kudos_by_post_id, delete_kudos, get_friends_posts, check_post_exists, check_kudos_exists
-from services.user import check_user_exists
+from ..database import get_db
+from ..models.post import Post as PostModel
+from ..models.kudos import Kudos as KudosModel
+from ..schemas.response import ResponseModel
+from ..schemas.post import PostCreate, PostResponse, KudosCreate, KudosResponse
+from ..services.post import create_post, get_posts_by_user_id, delete_post, add_kudos, get_kudos_by_post_id, delete_kudos, get_friends_posts, check_post_exists, check_kudos_exists
+from ..services.user import check_user_exists
 
-import logging
-logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/posts",
@@ -27,7 +25,6 @@ def create_new_post(post: PostCreate, db: Session = Depends(get_db)):
         new_post = create_post(db=db, post=post)
         return ResponseModel(status=200, data=PostResponse.model_validate(new_post), message="Post created successfully")
     except Exception as e:
-        logger.error(f"Error creating post: {e}")
         raise HTTPException(status_code=500, detail=f"An error occurred while creating the post: {e}") from e
 
 @router.get("/user/{user_id}", response_model=ResponseModel)

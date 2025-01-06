@@ -3,7 +3,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 from .donation import Donation
 from .enums import ChallengeStatus
-from database import Base
+from ..database import Base
 
 class ChallengeUser(Base):
     __tablename__ = "challenge_users"
