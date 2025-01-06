@@ -16,10 +16,13 @@ from ..services.user import (
     get_friend_requests,
     get_sent_requests,
     delete_friend,
-    check_user_exists,
-    get_user_by_email_and_password
+    get_user_by_email_and_password,
+    create_notification,
+    get_notifications,
+    get_new_notifications
 )
 from ..database import get_db
+from ..schemas.notification import NotificationCreate, NotificationResponse
 
 
 router = APIRouter(
@@ -126,3 +129,28 @@ def delete_friend_route(user_id: int, friend_id: int, db: Session = Depends(get_
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred while deleting the friend: {e}") from e
     
+@router.post("/{user_id}/notifications", response_model=ResponseModel)
+def create_notification_route(notification: NotificationCreate, db: Session = Depends(get_db)):
+    try:
+        notification = create_notification(db, notification)
+        return ResponseModel(status=200, data=NotificationResponse.model_validate(notification), message="Notification created successfully")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred while creating the notification: {e}") from e
+    
+@router.get("/{user_id}/notifications", response_model=ResponseModel)
+def get_notifications_route(user_id: int, db: Session = Depends(get_db)):
+    try:
+        notifications = get_notifications(db, user_id)
+        output = [NotificationResponse.model_validate(notification) for notification in notifications]
+        return ResponseModel(status=200, data=output, message="Notifications retrieved successfully")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred while retrieving notifications: {e}") from e
+    
+@router.get("/{user_id}/new-notifications", response_model=ResponseModel)
+def get_new_notifications_route(user_id: int, db: Session = Depends(get_db)):
+    try:
+        notifications = get_new_notifications(db, user_id)
+        output = [NotificationResponse.model_validate(notification) for notification in notifications]
+        return ResponseModel(status=200, data=output, message="New notifications retrieved successfully")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred while retrieving new notifications: {e}") from e

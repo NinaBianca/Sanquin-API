@@ -7,6 +7,8 @@ from ..models.user import User
 from ..models.friend import Friend
 from ..models.enums import FriendshipStatus
 from ..schemas.user import UserCreate, UserUpdate
+from ..schemas.notification import NotificationCreate, NotificationResponse
+from ..models.notification import Notification
 
 def check_user_exists(db: Session, user_id: int) -> bool:
     return db.query(User).filter(User.id == user_id).first() is not None
@@ -165,6 +167,53 @@ def delete_friend(db: Session, user_id: int, friend_id: int) -> None:
             raise HTTPException(status_code=404, detail=f"Friend not found with IDs {user_id} and {friend_id}")
         db.delete(friend)
         db.commit()
+    except SQLAlchemyError as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=e) from e
+    
+
+def create_notification(db: Session, notification: NotificationCreate) -> Notification:
+    try:
+        if not check_user_exists(db, notification.user_id):
+            raise HTTPException(status_code=404, detail=f"User not found with ID {notification.user_id}")
+        new_notification = Notification(
+            title=notification.title,
+            content=notification.content,
+            user_id=notification.user_id
+        )
+        db.add(new_notification)
+        db.commit()
+        db.refresh(new_notification)
+        return new_notification
+    except SQLAlchemyError as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=e) from e
+    
+def get_notifications(db: Session, user_id: int) -> list[Notification]:
+    try:
+        if not check_user_exists(db, user_id):
+            raise HTTPException(status_code=404, detail=f"User not found with ID {user_id}")
+        notifications = db.query(Notification).filter(Notification.user_id == user_id).all()
+        if not notifications:
+            raise HTTPException(status_code=404, detail=f"Notifications not found for user with ID {user_id}")
+        return notifications
+    except SQLAlchemyError as e:
+        raise HTTPException(status_code=500, detail=e) from e
+    
+def get_new_notifications(db: Session, user_id: int) -> list[Notification]:
+    try:
+        if not check_user_exists(db, user_id):
+            raise HTTPException(status_code=404, detail=f"User not found with ID {user_id}")
+        notifications = db.query(Notification).filter(Notification.user_id == user_id, Notification.retrieved == False).all()
+        if not notifications:
+            raise HTTPException(status_code=404, detail=f"New notifications not found for user with ID {user_id}")
+        
+        for notification in notifications:
+            notification.retrieved = True
+        db.commit()
+        for notification in notifications:
+            db.refresh(notification)
+        return notifications
     except SQLAlchemyError as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=e) from e

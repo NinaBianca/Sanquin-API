@@ -74,6 +74,21 @@ sample_friend_request = {
     "created_at": "2021-01-01T00:00:00Z",
 }
 
+sample_new_notification = {
+    "title": "Test Notification",
+    "content": "This is a test notification",
+    "user_id": 1,
+}
+
+sample_notification = {
+    "id": 1,
+    "title": "Test Notification",
+    "content": "This is a test notification",
+    "user_id": 1,
+    "created_at": "2021-01-01T00:00:00Z",
+    "retrieved": False,
+}
+
 # --- User Routes Tests ---
 
 # Test for creating a user
@@ -264,4 +279,52 @@ def test_delete_friend_route_user_not_found(check_user_exists):
     response = client.delete("/users/1/friends/999")
     assert response.status_code == 500
     assert "An error occurred while deleting the friend" in response.json()["detail"]
+
+# --- Notification Routes Tests ---
+# Test for creating a notification
+@patch("routers.users.create_notification", return_value=sample_notification)
+@patch("services.user.check_user_exists", return_value=True)
+def test_create_notification_route(check_user_exists, create_notification):
+    response = client.post("/users/1/notifications", json=sample_new_notification)
+    assert response.status_code == 200
+    assert response.json()["message"] == "Notification created successfully"
+
+# Test for creating a notification when user does not exist
+@patch("services.user.check_user_exists", return_value=False)
+def test_create_notification_route_user_not_found(check_user_exists):
+    response = client.post("/users/999/notifications", json=sample_new_notification)
+    assert response.status_code == 500
+    assert "An error occurred while creating the notification" in response.json()["detail"]
+
+# Test for getting notifications
+@patch("routers.users.get_notifications", return_value=[sample_notification])
+@patch("services.user.check_user_exists", return_value=True)
+def test_get_notifications_route(check_user_exists, get_notifications):
+    response = client.get("/users/1/notifications")
+    assert response.status_code == 200
+    assert response.json()["message"] == "Notifications retrieved successfully"
+    assert response.json()["data"][0]["title"] == sample_notification["title"]
+
+# Test for getting notifications when user does not exist
+@patch("services.user.check_user_exists", return_value=False)
+def test_get_notifications_route_user_not_found(check_user_exists):
+    response = client.get("/users/999/notifications")
+    assert response.status_code == 500
+    assert "An error occurred while retrieving notifications" in response.json()["detail"]
+
+# Test for getting new notifications
+@patch("routers.users.get_new_notifications", return_value=[sample_notification])
+@patch("services.user.check_user_exists", return_value=True)
+def test_get_new_notifications_route(check_user_exists, get_new_notifications):
+    response = client.get("/users/1/new-notifications")
+    assert response.status_code == 200
+    assert response.json()["message"] == "New notifications retrieved successfully"
+    assert response.json()["data"][0]["retrieved"] == False
+
+# Test for getting new notifications when user does not exist
+@patch("services.user.check_user_exists", return_value=False)
+def test_get_new_notifications_route_user_not_found(check_user_exists):
+    response = client.get("/users/999/new-notifications")
+    assert response.status_code == 500
+    assert "An error occurred while retrieving new notifications" in response.json()["detail"]
     
