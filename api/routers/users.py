@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from ..models.enums import FriendshipStatus
-from ..schemas.response import ResponseModel
-from ..schemas.user import UserCreate, UserUpdate, UserResponse
-from ..schemas.friend import FriendRequestModel
-from ..services.user import (
+from models.enums import FriendshipStatus
+from schemas.response import ResponseModel
+from schemas.user import UserCreate, UserUpdate, UserResponse
+from schemas.friend import FriendRequestModel
+from services.user import (
     create_user,
     get_user_by_id,
     get_users_by_partial_username,
@@ -21,8 +21,8 @@ from ..services.user import (
     get_notifications,
     get_new_notifications
 )
-from ..database import get_db
-from ..schemas.notification import NotificationCreate, NotificationResponse
+from database import get_db
+from schemas.notification import NotificationCreate, NotificationResponse
 
 
 router = APIRouter(

@@ -1,11 +1,11 @@
 from fastapi import HTTPException, APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from ..database import get_db
-from ..schemas.response import ResponseModel
-from ..schemas.challenge import ChallengeCreate, ChallengeUpdate, ChallengeResponse
-from ..schemas.user import UserResponse
-from ..services.challenge import (
+from database import get_db
+from schemas.response import ResponseModel
+from schemas.challenge import ChallengeCreate, ChallengeUpdate, ChallengeResponse
+from schemas.user import UserResponse
+from services.challenge import (
     create_challenge,
     get_challenges,
     get_challenges_by_user_id,
@@ -16,7 +16,7 @@ from ..services.challenge import (
     get_users_by_challenge_id,
     delete_user_from_challenge
 )
-from ..services.user import check_user_exists
+from services.user import check_user_exists
 
 router = APIRouter(
     prefix="/challenges",

@@ -1,11 +1,11 @@
 from fastapi import HTTPException, APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from ..database import get_db
-from ..schemas.response import ResponseModel
-from ..schemas.donation import DonationCreate, DonationBase, LocationInfoCreate, LocationInfoBase, LocationInfoResponse, Timeslot, DonationResponse, TimeslotResponse
-from ..services.donation import (
-    check_donation_exists,
+from database import get_db
+from schemas.response import ResponseModel
+from schemas.donation import DonationCreate, DonationBase, LocationInfoCreate, LocationInfoBase, LocationInfoResponse, Timeslot, DonationResponse, TimeslotResponse
+from services.donation import (
+    get_location_info_by_id,
     create_donation,
     get_donations_by_user_id,
     delete_donation,
@@ -20,7 +20,7 @@ from ..services.donation import (
     get_friends_donations
     
 )
-from ..services.user import check_user_exists
+from services.user import check_user_exists
 
 router = APIRouter(
     prefix="/donations",
@@ -101,6 +101,14 @@ def get_location_info_by_city_route(city: str, db: Session = Depends(get_db)):
         locations = get_location_info_by_city(db, city)
         output = [LocationInfoResponse.model_validate(location) for location in locations]   
         return ResponseModel(status=200, data=output, message="Location(s) retrieved successfully")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred while retrieving location information: {e}") from e
+
+@router.get("/location/{location_id}/info", response_model=ResponseModel)
+def get_location_info_by_id_route(location_id: int, db: Session = Depends(get_db)):
+    try:
+        location = get_location_info_by_id(db, location_id)
+        return ResponseModel(status=200, data=LocationInfoResponse.model_validate(location), message="Location retrieved successfully")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred while retrieving location information: {e}") from e
 

@@ -4,7 +4,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 from .challenge_user import ChallengeUser
 from .donation import Donation
-from ..database import Base
+from database import Base
 
 class Challenge(Base):
     __tablename__ = "challenges"
