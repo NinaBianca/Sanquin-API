@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
 from typing import List, Optional
-from ..models.enums import DonationType, DonationStatus
+from models.enums import DonationType, DonationStatus
 
 
 class Timeslot(BaseModel):

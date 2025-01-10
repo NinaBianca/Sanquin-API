@@ -4,9 +4,9 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 
-from ..models.challenge import Challenge
-from ..models.challenge_user import ChallengeUser
-from ..schemas.challenge import ChallengeCreate, ChallengeUpdate
+from models.challenge import Challenge
+from models.challenge_user import ChallengeUser
+from schemas.challenge import ChallengeCreate, ChallengeUpdate
 
 
 def check_challenge_exists(db, challenge_id):
