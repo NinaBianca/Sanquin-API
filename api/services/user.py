@@ -3,12 +3,12 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import or_
-from ..models.user import User
-from ..models.friend import Friend
-from ..models.enums import FriendshipStatus
-from ..schemas.user import UserCreate, UserUpdate
-from ..schemas.notification import NotificationCreate, NotificationResponse
-from ..models.notification import Notification
+from models.user import User
+from models.friend import Friend
+from models.enums import FriendshipStatus
+from schemas.user import UserCreate, UserUpdate
+from schemas.notification import NotificationCreate, NotificationResponse
+from models.notification import Notification
 
 def check_user_exists(db: Session, user_id: int) -> bool:
     return db.query(User).filter(User.id == user_id).first() is not None

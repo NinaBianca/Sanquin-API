@@ -135,7 +135,7 @@ def test_get_friends_donations_route_service_error(get_friends_donations, check_
 
 # Test for deleting a donation
 @patch("routers.donations.delete_donation", return_value=True)
-@patch("routers.donations.check_donation_exists", return_value=True)
+@patch("services.donation.check_donation_exists", return_value=True)
 def test_delete_donation_route(delete_donation, check_donation_exists):
     response = client.delete("/donations/1")
     assert response.status_code == 200
@@ -150,7 +150,7 @@ def test_delete_donation_route_not_found(check_donation_exists):
 
 # Test for updating a donation
 @patch("routers.donations.update_donation", return_value=sample_update_donation)
-@patch("routers.donations.check_donation_exists", return_value=True)
+@patch("services.donation.check_donation_exists", return_value=True)
 def test_update_donation_route(update_donation, check_donation_exists):
     response = client.put("/donations/1", json=sample_donation)
     assert response.status_code == 200
@@ -165,7 +165,7 @@ def test_update_donation_route_not_found(check_donation_exists):
 
 # Test for getting a donation by ID
 @patch("routers.donations.get_donation_by_id", return_value=sample_update_donation)
-@patch("routers.donations.check_donation_exists", return_value=True)
+@patch("services.donation.check_donation_exists", return_value=True)
 def test_get_donation_route(get_donation_by_id, check_donation_exists):
     response = client.get("/donations/1")
     assert response.status_code == 200
@@ -204,6 +204,20 @@ def test_get_location_info_by_city_route(get_location_info_by_city):
 @patch("routers.donations.get_location_info_by_city", side_effect=Exception("Test Exception"))
 def test_get_location_info_by_city_route_service_error(get_location_info_by_city):
     response = client.get("/donations/location/Test City")
+    assert response.status_code == 500
+    assert "An error occurred while retrieving location information" in response.json()["detail"]
+
+# Test for getting location info by ID 
+@patch("routers.donations.get_location_info_by_id", return_value=sample_location_response)
+def test_get_location_info_by_id_route(get_location_info_by_id):
+    response = client.get("/donations/location/1/info")
+    assert response.status_code == 200
+    assert response.json()["message"] == "Location retrieved successfully"
+
+# Test for getting location info by ID not found
+@patch("services.donation.check_location_exists", return_value=False)
+def test_get_location_info_by_id_route_not_found(check_location_exists):
+    response = client.get("/donations/location/2/info")
     assert response.status_code == 500
     assert "An error occurred while retrieving location information" in response.json()["detail"]
 

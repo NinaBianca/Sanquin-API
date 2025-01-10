@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, Boolean, ForeignKey, Float, DateTime, En
 from sqlalchemy.orm import relationship
 from datetime import datetime, UTC
 from .enums import DonationType, DonationStatus
-from ..database import Base
+from database import Base
 
 class Donation(Base):
     __tablename__ = "donations"
