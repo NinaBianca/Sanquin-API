@@ -5,10 +5,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import desc, or_
 
-from models.donation import Donation
-from models.friend import Friend
-from models.location_info import LocationInfo, Timeslot
-from schemas.donation import LocationInfoCreate, DonationCreate, DonationUpdate
+from ..models.donation import Donation
+from ..models.friend import Friend
+from ..models.location_info import LocationInfo, Timeslot
+from ..schemas.donation import LocationInfoCreate, DonationCreate, DonationUpdate
 
 def check_donation_exists(db, donation_id):
     return db.query(Donation).filter(Donation.id == donation_id).first() is not None
