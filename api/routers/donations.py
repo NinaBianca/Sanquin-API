@@ -5,7 +5,7 @@ from ..database import get_db
 from ..schemas.response import ResponseModel
 from ..schemas.donation import DonationCreate, DonationBase, LocationInfoCreate, LocationInfoBase, LocationInfoResponse, Timeslot, DonationResponse, TimeslotResponse
 from ..services.donation import (
-    get_location_info_by_id,
+    get_location_name_by_id,
     create_donation,
     get_donations_by_user_id,
     delete_donation,
@@ -104,11 +104,11 @@ def get_location_info_by_city_route(city: str, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred while retrieving location information: {e}") from e
 
-@router.get("/location/{location_id}/info", response_model=ResponseModel)
-def get_location_info_by_id_route(location_id: int, db: Session = Depends(get_db)):
+@router.get("/location/{location_id}/name", response_model=ResponseModel)
+def get_location_name_by_id_route(location_id: int, db: Session = Depends(get_db)):
     try:
-        location = get_location_info_by_id(db, location_id)
-        return ResponseModel(status=200, data=LocationInfoResponse.model_validate(location), message="Location retrieved successfully")
+        location = get_location_name_by_id(db, location_id)
+        return ResponseModel(status=200, data=str(location), message="Location retrieved successfully")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred while retrieving location information: {e}") from e
 
