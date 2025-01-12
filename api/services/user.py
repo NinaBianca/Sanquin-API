@@ -67,7 +67,7 @@ def get_user_by_email_and_password(db: Session, email: str, password: str) -> Us
 
 def get_users_by_partial_username(db: Session, username: str) -> list[User]:
     try:
-        users = db.query(User).filter(User.username.contains(username)).all()
+        users = db.query(User).filter(User.username.ilike(f'%{username}%')).all()
         if not users:
             raise HTTPException(status_code=404, detail=f"Users not found with partial username {username}")
         return users
