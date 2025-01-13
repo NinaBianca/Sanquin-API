@@ -155,8 +155,10 @@ def get_users_by_challenge_id(db: Session, challenge_id: int):
                 status_code=404, detail=f"No users found for challenge with ID {challenge_id}"
             )
         users = [challenge_user.user for challenge_user in challenge_users]
+        start = challenge_users[0].challenge.start
+        end = challenge_users[0].challenge.end
         for user in users:
-            user.total_contributions = calculate_total_contributions(db, challenge_id, user.start, user.end)
+            user.total_contributions = calculate_total_contributions(db, challenge_id, start, end)
         return users
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
@@ -223,8 +225,10 @@ def get_friends_by_challenge_id(db: Session, challenge_id: int, user_id: int):
         
         # Filter the list of challenge participants to include only those who are friends with the specified user
         friends_participating = [challenge_user.user for challenge_user in challenge_users if challenge_user.user_id in friend_ids]
+        start = challenge_users[0].challenge.start
+        end = challenge_users[0].challenge.end
         for friend in friends_participating:
-            friend.total_contributions = calculate_total_contributions(db, challenge_id, friend.start, friend.end)
+            friend.total_contributions = calculate_total_contributions(db, challenge_id, start, end)
         return friends_participating
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
