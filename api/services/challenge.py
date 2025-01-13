@@ -3,12 +3,14 @@ from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, or_
 from sqlalchemy.orm import Session
-from models.challenge import Challenge
-from models.challenge_user import ChallengeUser
-from models.enums import FriendshipStatus
-from models.friend import Friend
-from models.donation import Donation
-from schemas.challenge import ChallengeCreate, ChallengeUpdate
+from sqlalchemy import desc
+
+from ..models.challenge import Challenge
+from ..models.challenge_user import ChallengeUser
+from ..model.enums import FriendshipStatus
+from ..model.friend import Friend
+from ..model.donation import Donation
+from ..schemas.challenge import ChallengeCreate, ChallengeUpdate
 
 
 def check_challenge_exists(db: Session, challenge_id: int) -> bool:

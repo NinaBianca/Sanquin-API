@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.asyncio import AsyncSession
 from .challenge_user import ChallengeUser
 from .donation import Donation
-from database import Base
+from ..database import Base
 
 class Challenge(Base):
     __tablename__ = "challenges"

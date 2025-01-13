@@ -5,10 +5,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import desc, or_
 
-from models.donation import Donation
-from models.friend import Friend
-from models.location_info import LocationInfo, Timeslot
-from schemas.donation import LocationInfoCreate, DonationCreate, DonationUpdate
+from ..models.donation import Donation
+from ..models.friend import Friend
+from ..models.location_info import LocationInfo, Timeslot
+from ..schemas.donation import LocationInfoCreate, DonationCreate, DonationUpdate
 
 def check_donation_exists(db, donation_id):
     return db.query(Donation).filter(Donation.id == donation_id).first() is not None
@@ -136,14 +136,14 @@ def get_location_info_by_city(db: Session, city: str):
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=e) from e
     
-def get_location_info_by_id(db: Session, location_id: int):
+def get_location_name_by_id(db: Session, location_id: int):
     try:
         if not check_location_exists(db, location_id):
             raise HTTPException(
                 status_code=404, detail=f"Location not found with ID {location_id}"
             )
         location = db.query(LocationInfo).filter(LocationInfo.id == location_id).first()
-        return location
+        return location.name
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=e) from e
 
