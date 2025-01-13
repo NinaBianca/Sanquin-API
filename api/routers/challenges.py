@@ -1,6 +1,6 @@
 from fastapi import HTTPException, APIRouter, Depends
+from sqlalchemy import select
 from sqlalchemy.orm import Session
-
 from ..database import get_db
 from ..schemas.response import ResponseModel
 from ..schemas.challenge import ChallengeCreate, ChallengeUpdate, ChallengeResponse
@@ -14,7 +14,8 @@ from ..services.challenge import (
     get_challenge_by_id,
     add_user_to_challenge,
     get_users_by_challenge_id,
-    delete_user_from_challenge
+    delete_user_from_challenge,
+    get_friends_by_challenge_id
 )
 from ..services.user import check_user_exists
 
@@ -66,7 +67,7 @@ def remove_challenge_route(challenge_id: int, db: Session = Depends(get_db)):
 @router.post("/{challenge_id}/user/{user_id}", response_model=ResponseModel)
 def add_user_to_challenge_route(challenge_id: int, user_id: int, db: Session = Depends(get_db)):
     if not check_user_exists(db, user_id):
-            raise HTTPException(status_code=404, detail=f"User not found with ID {user_id}")
+        raise HTTPException(status_code=404, detail=f"User not found with ID {user_id}")
     try:
         add_user_to_challenge(db, challenge_id, user_id)
         return ResponseModel(status=200, message="User added to challenge successfully")
@@ -76,12 +77,23 @@ def add_user_to_challenge_route(challenge_id: int, user_id: int, db: Session = D
 @router.get("/user/{user_id}", response_model=ResponseModel)
 def read_challenges_by_user_id_route(user_id: int, db: Session = Depends(get_db)):
     if not check_user_exists(db, user_id):
-            raise HTTPException(status_code=404, detail=f"User not found with ID {user_id}")
+        raise HTTPException(status_code=404, detail=f"User not found with ID {user_id}")
     try:
         challenges = get_challenges_by_user_id(db=db, user_id=user_id)
         return ResponseModel(status=200, data=[ChallengeResponse.model_validate(challenge) for challenge in challenges], message="Challenges retrieved successfully")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred while retrieving the challenges: {e}") from e
+    
+
+@router.get("/{challenge_id}/users/{user_id}/friends", response_model=ResponseModel)
+def get_friends_by_challenge_id_route(challenge_id: int, user_id: int, db: Session = Depends(get_db)):
+    if not check_user_exists(db, user_id):
+        raise HTTPException(status_code=404, detail=f"User not found with ID {user_id}")
+    try:
+        users = get_friends_by_challenge_id(db, challenge_id, user_id)
+        return ResponseModel(status=200, data=[UserResponse.model_validate(friend) for friend in users], message="Friends retrieved successfully")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred while retrieving the friends: {e}") from e
 
 @router.get("/{challenge_id}/users", response_model=ResponseModel)
 def get_users_by_challenge_id_route(challenge_id: int, db: Session = Depends(get_db)):
@@ -94,9 +106,10 @@ def get_users_by_challenge_id_route(challenge_id: int, db: Session = Depends(get
 @router.delete("/{challenge_id}/user/{user_id}", response_model=ResponseModel)
 def delete_user_from_challenge_route(challenge_id: int, user_id: int, db: Session = Depends(get_db)):
     if not check_user_exists(db, user_id):
-            raise HTTPException(status_code=404, detail=f"User not found with ID {user_id}")
+        raise HTTPException(status_code=404, detail=f"User not found with ID {user_id}")
     try:
         delete_user_from_challenge(db, challenge_id, user_id)
         return ResponseModel(status=200, message="User deleted from challenge successfully")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred while deleting user from challenge: {e}") from e
+    
