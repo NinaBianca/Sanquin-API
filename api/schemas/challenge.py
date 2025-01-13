@@ -9,6 +9,7 @@ class ChallengeBase(BaseModel):
     goal: float = Field(...)
     start: datetime = Field(...)
     end: datetime = Field(...)
+    reward_points: int = Field(...)
     
     model_config = ConfigDict(from_attributes=True)
 
@@ -26,6 +27,7 @@ class ChallengeUpdate(BaseModel):
 
 class ChallengeResponse(ChallengeBase):
     id: int = Field(...)
+    total_contributions: float = Field(...)
 
     def model_dump(self):
         return {
@@ -35,7 +37,8 @@ class ChallengeResponse(ChallengeBase):
             "location": self.location,
             "goal": self.goal,
             "start": self.start,
-            "end": self.end
+            "end": self.end,
+            "total_contributions": self.total_contributions
         }
     
 
