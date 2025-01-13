@@ -11,7 +11,7 @@ from ..models.enums import FriendshipStatus
 from ..models.friend import Friend
 from ..models.donation import Donation
 from ..schemas.challenge import ChallengeCreate, ChallengeUpdate
-from ..schemas.user import ChallengeUserResponse
+
 
 
 def check_challenge_exists(db: Session, challenge_id: int) -> bool:
@@ -75,7 +75,7 @@ def get_challenge_by_id(db: Session, challenge_id: int):
         # Calculate total contributions for the challenge
         total_contributions = calculate_total_contributions(db, challenge.id, challenge.start, challenge.end)
         challenge.total_contributions = total_contributions
-        print(challenge.total_contributions)
+        
         return challenge
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
@@ -159,8 +159,7 @@ def get_users_by_challenge_id(db: Session, challenge_id: int):
         start = challenge_users[0].challenge.start
         end = challenge_users[0].challenge.end
         for user in users:
-            user.total_contributions = calculate_total_contributions(db, challenge_id, start, end)
-            ChallengeUserResponse.model_dump(user)
+            user.total_contributions = calculate_total_contribution(db, user.id, start, end)
         return users
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
@@ -230,11 +229,22 @@ def get_friends_by_challenge_id(db: Session, challenge_id: int, user_id: int):
         start = challenge_users[0].challenge.start
         end = challenge_users[0].challenge.end
         for friend in friends_participating:
-            friend.total_contributions = calculate_total_contributions(db, challenge_id, start, end)
-            ChallengeUserResponse.model_dump(friend)
+            friend.total_contributions = calculate_total_contribution(db, friend.id, start, end)
         return friends_participating
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
+    
+def calculate_total_contribution(db: Session, user_id: int, start: datetime, end: datetime) -> float:
+    result = db.execute(
+        select(func.sum(Donation.amount))
+        .filter(
+            Donation.user_id == user_id,
+            Donation.appointment >= start,
+            Donation.appointment <= end
+        )
+    )
+    total_contribution = result.scalar()
+    return total_contribution or 0.0
 
 def calculate_total_contributions(db: Session, challenge_id: int, start: datetime, end: datetime) -> float:
     result = db.execute(

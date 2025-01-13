@@ -33,10 +33,6 @@ class UserUpdate(BaseModel):
     role: Optional[UserRole] = Field(None)
     
     model_config = ConfigDict(from_attributes=True)
-
-class ChallengeUserResponse(UserCreate):
-    id: int
-    total_contributions: float
     
 
 class UserResponse(BaseModel):
@@ -53,3 +49,7 @@ class UserResponse(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class ChallengeUserResponse(UserResponse):
+    total_contributions: float

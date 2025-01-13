@@ -91,6 +91,9 @@ def get_friends_by_challenge_id_route(challenge_id: int, user_id: int, db: Sessi
         raise HTTPException(status_code=404, detail=f"User not found with ID {user_id}")
     try:
         users = get_friends_by_challenge_id(db, challenge_id, user_id)
+        for user in users:
+            user = UserResponse.model_validate(user)
+            user.total_contributions = user.total_contributions
         return ResponseModel(status=200, data=[ChallengeUserResponse.model_validate(friend) for friend in users], message="Friends retrieved successfully")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred while retrieving the friends: {e}") from e
@@ -99,6 +102,9 @@ def get_friends_by_challenge_id_route(challenge_id: int, user_id: int, db: Sessi
 def get_users_by_challenge_id_route(challenge_id: int, db: Session = Depends(get_db)):
     try:
         users = get_users_by_challenge_id(db, challenge_id)
+        for user in users:
+            user = UserResponse.model_validate(user)
+            user.total_contributions = user.total_contributions
         return ResponseModel(status=200, data=[ChallengeUserResponse.model_validate(user) for user in users], message="Users retrieved successfully")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred while retrieving the users: {e}") from e
