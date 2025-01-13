@@ -11,6 +11,7 @@ from ..models.enums import FriendshipStatus
 from ..models.friend import Friend
 from ..models.donation import Donation
 from ..schemas.challenge import ChallengeCreate, ChallengeUpdate
+from ..schemas.user import ChallengeUserResponse
 
 
 def check_challenge_exists(db: Session, challenge_id: int) -> bool:
@@ -159,6 +160,7 @@ def get_users_by_challenge_id(db: Session, challenge_id: int):
         end = challenge_users[0].challenge.end
         for user in users:
             user.total_contributions = calculate_total_contributions(db, challenge_id, start, end)
+            ChallengeUserResponse.model_dump(user)
         return users
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
@@ -229,6 +231,7 @@ def get_friends_by_challenge_id(db: Session, challenge_id: int, user_id: int):
         end = challenge_users[0].challenge.end
         for friend in friends_participating:
             friend.total_contributions = calculate_total_contributions(db, challenge_id, start, end)
+            ChallengeUserResponse.model_dump(friend)
         return friends_participating
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
