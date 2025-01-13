@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from ..database import get_db
 from ..schemas.response import ResponseModel
 from ..schemas.challenge import ChallengeCreate, ChallengeUpdate, ChallengeResponse
-from ..schemas.user import UserResponse
+from ..schemas.user import UserResponse, ChallengeUserResponse
 from ..services.challenge import (
     create_challenge,
     get_challenges,
@@ -91,7 +91,7 @@ def get_friends_by_challenge_id_route(challenge_id: int, user_id: int, db: Sessi
         raise HTTPException(status_code=404, detail=f"User not found with ID {user_id}")
     try:
         users = get_friends_by_challenge_id(db, challenge_id, user_id)
-        return ResponseModel(status=200, data=[UserResponse.model_validate(friend) for friend in users], message="Friends retrieved successfully")
+        return ResponseModel(status=200, data=[ChallengeUserResponse.model_validate(friend) for friend in users], message="Friends retrieved successfully")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred while retrieving the friends: {e}") from e
 
@@ -99,7 +99,7 @@ def get_friends_by_challenge_id_route(challenge_id: int, user_id: int, db: Sessi
 def get_users_by_challenge_id_route(challenge_id: int, db: Session = Depends(get_db)):
     try:
         users = get_users_by_challenge_id(db, challenge_id)
-        return ResponseModel(status=200, data=[UserResponse.model_validate(user) for user in users], message="Users retrieved successfully")
+        return ResponseModel(status=200, data=[ChallengeUserResponse.model_validate(user) for user in users], message="Users retrieved successfully")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred while retrieving the users: {e}") from e
 

@@ -34,6 +34,11 @@ class UserUpdate(BaseModel):
     
     model_config = ConfigDict(from_attributes=True)
 
+class ChallengeUserResponse(UserCreate):
+    id: int
+    total_contributions: float
+    
+
 class UserResponse(BaseModel):
     id: int
     first_name: str
