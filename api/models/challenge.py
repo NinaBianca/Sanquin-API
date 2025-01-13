@@ -1,7 +1,8 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime
-from sqlalchemy.sql import func
+from sqlalchemy.sql import func, select, between
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
+from sqlalchemy.ext.asyncio import AsyncSession
 from .challenge_user import ChallengeUser
 from .donation import Donation
 from database import Base
@@ -16,21 +17,6 @@ class Challenge(Base):
     goal = Column(Float, nullable=False)
     start = Column(DateTime, nullable=False)
     end = Column(DateTime, nullable=False)
+    reward_points = Column(Integer, nullable=False, default=0)
 
     participants = relationship("ChallengeUser", back_populates="challenge", cascade="all, delete-orphan")
-
-    # Hybrid property to calculate total contributions (participant donations)
-    @hybrid_property
-    def total(self):
-        from sqlalchemy.orm import Session
-        session = Session.object_session(self)
-        total_contributions = (
-            session.query(func.sum(Donation.amount))
-            .join(ChallengeUser, Donation.user_id == ChallengeUser.user_id)
-            .filter(
-                ChallengeUser.challenge_id == self.id,
-                Donation.appointment.between(self.start, self.end)
-            )
-            .scalar()
-        )
-        return total_contributions or 0.0
