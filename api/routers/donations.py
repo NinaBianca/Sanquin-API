@@ -73,7 +73,7 @@ def remove_donation(donation_id: int, db: Session = Depends(get_db)):
 def update_donation_route(donation_id: int, donation: DonationBase, db: Session = Depends(get_db)):
     try:
         updated_donation = update_donation(db, donation_id, donation)
-        return ResponseModel(status=200, data=updated_donation, message="Donation updated successfully")
+        return ResponseModel(status=200, data=DonationResponse.model_validate(updated_donation), message="Donation updated successfully")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred while updating the donation: {e}") from e
 
