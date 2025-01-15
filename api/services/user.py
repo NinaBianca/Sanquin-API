@@ -88,6 +88,23 @@ def update_user(db: Session, user_id: int, user_partial: UserUpdate) -> User:
     except SQLAlchemyError as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=e) from e
+    
+def update_user_points(db: Session, user_id: int, points: int, subtract: bool) -> User:
+    try:
+        if not check_user_exists(db, user_id):
+            raise HTTPException(status_code=404, detail=f"User not found with ID {user_id}")
+        user = get_user_by_id(db, user_id)
+        if subtract:
+            user.current_points -= points
+        else:
+            user.current_points += points
+            user.total_points += points
+        db.commit()
+        db.refresh(user)
+        return user
+    except SQLAlchemyError as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=e) from e
 
 def delete_user(db: Session, user_id: int) -> None:
     try:

@@ -19,7 +19,8 @@ from ..services.user import (
     get_user_by_email_and_password,
     create_notification,
     get_notifications,
-    get_new_notifications
+    get_new_notifications,
+    update_user_points
 )
 from ..database import get_db
 from ..schemas.notification import NotificationCreate, NotificationResponse
@@ -66,6 +67,14 @@ def get_users_by_partial_username_route(username: str, db: Session = Depends(get
 def update_user_route(user_id: int, user: UserUpdate, db: Session = Depends(get_db)):
     try:
         updated_user = update_user(db, user_id, user)
+        return ResponseModel(status=200, data=UserResponse.model_validate(updated_user), message="User updated successfully")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred while updating the user: {e}") from e
+    
+@router.put("/update/{user_id}/points/{points}", response_model=ResponseModel)
+def update_user_points_route(user_id: int, points: int, subtract: bool, db: Session = Depends(get_db)):
+    try:
+        updated_user = update_user_points(db, user_id, points, subtract)
         return ResponseModel(status=200, data=UserResponse.model_validate(updated_user), message="User updated successfully")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred while updating the user: {e}") from e
