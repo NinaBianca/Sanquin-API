@@ -26,6 +26,7 @@ from ..services.donation import (
     
 )
 from ..services.user import check_user_exists
+from fastapi.encoders import jsonable_encoder
 
 router = APIRouter(
     prefix="/donations",
@@ -110,7 +111,7 @@ def get_all_location_info_route(db: Session = Depends(get_db)):
         output = [LocationInfoResponse.model_validate(location) for location in locations]
 
         # Convert to JSON and compress
-        json_data = json.dumps([location.model_dump() for location in output])
+        json_data = json.dumps(jsonable_encoder(output))
         compressed_data = zlib.compress(json_data.encode('utf-8'))
 
         # Store the compressed data in Redis
