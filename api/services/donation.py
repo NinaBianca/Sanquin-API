@@ -2,8 +2,10 @@ from datetime import datetime, timezone
 
 from fastapi import HTTPException
 from fastapi_cache import FastAPICache
-from fastapi_cache.backends.inmemory import InMemoryBackend
+from fastapi_cache.backends.redis import RedisBackend
 from fastapi_cache.decorator import cache
+import redis
+import os
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import desc, or_, exists, and_, delete
@@ -15,8 +17,13 @@ from ..models.friend import Friend
 from ..models.location_info import LocationInfo, Timeslot
 from ..schemas.donation import LocationInfoCreate, DonationCreate, DonationUpdate
 
-# Initialize FastAPI cache
-FastAPICache.init(InMemoryBackend(), prefix="fastapi-cache")
+redis_url = os.getenv("REDIS_URL", "redis://<password>@<host>:<port>")
+
+# Setup Redis client with the Redis URL
+redis_client = redis.from_url(redis_url)
+
+# Initialize FastAPI Cache with Redis
+FastAPICache.init(RedisBackend(redis_client), prefix="fastapi-cache")
 
 def check_donation_exists(db, donation_id):
     return db.query(exists().where(Donation.id == donation_id)).scalar()
