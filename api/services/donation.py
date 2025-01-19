@@ -1,6 +1,8 @@
 from datetime import datetime, timezone
 
 from fastapi import HTTPException
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.inmemory import InMemoryBackend
 from fastapi_cache.decorator import cache
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
@@ -12,6 +14,9 @@ from ..models.donation import Donation
 from ..models.friend import Friend
 from ..models.location_info import LocationInfo, Timeslot
 from ..schemas.donation import LocationInfoCreate, DonationCreate, DonationUpdate
+
+# Initialize FastAPI cache
+FastAPICache.init(InMemoryBackend(), prefix="fastapi-cache")
 
 def check_donation_exists(db, donation_id):
     return db.query(exists().where(Donation.id == donation_id)).scalar()
