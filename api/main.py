@@ -6,6 +6,8 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 import redis
 import os
+from contextlib import asynccontextmanager
+
 
 try:
     load_dotenv()
