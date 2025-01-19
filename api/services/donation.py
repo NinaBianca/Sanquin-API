@@ -18,6 +18,8 @@ from ..models.location_info import LocationInfo, Timeslot
 from ..schemas.donation import LocationInfoCreate, DonationCreate, DonationUpdate
 
 redis_url = os.getenv("REDIS_URL")
+redis_url.set('key', 'redis-py')
+redis_url.get('key')
 
 # Setup Redis client with the Redis URL
 redis_client = redis.from_url(redis_url)
