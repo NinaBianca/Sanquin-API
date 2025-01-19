@@ -1,7 +1,8 @@
 from fastapi import HTTPException, APIRouter, Depends
 from fastapi_cache.decorator import cache
-from fastapi_cache import FastAPICache
+import redis
 import zlib
+import os
 import json
 from sqlalchemy.orm import Session
 
@@ -95,7 +96,7 @@ def get_donation_route(donation_id: int, db: Session = Depends(get_db)):
 def get_all_location_info_route(db: Session = Depends(get_db)):
     try:
         cache_key = "locations_all"
-        redis_client = FastAPICache.get_backend()
+        redis_client = redis.from_url(os.getenv("REDIS_URL"))
         compressed_data = redis_client.get(cache_key)
 
         if compressed_data:
