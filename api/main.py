@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from .routers import users, posts, donations, challenges
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
-import redis.asyncio as redis
+import redis
 import os
 from contextlib import asynccontextmanager
 
