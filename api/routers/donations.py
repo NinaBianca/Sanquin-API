@@ -1,4 +1,5 @@
 from fastapi import HTTPException, APIRouter, Depends
+from fastapi_cache.decorator import cache
 from sqlalchemy.orm import Session
 
 from ..database import get_db
@@ -87,6 +88,7 @@ def get_donation_route(donation_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"An error occurred while retrieving the donation: {e}") from e
 
 @router.get("/location/all", response_model=ResponseModel)
+@cache(600)
 def get_all_location_info_route(db: Session = Depends(get_db)):
     try:
         locations = get_all_location_info(db)

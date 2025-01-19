@@ -119,7 +119,6 @@ def get_donation_by_id(db: Session, donation_id: int):
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=e) from e
 
-@cache(600)
 def get_all_location_info(db: Session):
     try:
         locations = db.query(LocationInfo).all()
