@@ -1,7 +1,6 @@
 from fastapi import FastAPI, Response
 from dotenv import load_dotenv
 from .routers import users, posts, donations, challenges
-from uvicorn import lifespan
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 import redis
@@ -15,10 +14,11 @@ except Exception as e:
     SystemExit(f"Error loading .env file: {e}")
 
 @asynccontextmanager
-async def lifespan_(app: FastAPI):
+async def lifespan(app: FastAPI):
     redis_url = os.getenv("REDIS_URL")
     redis_client = redis.StrictRedis(redis_url)
     FastAPICache.init(RedisBackend(redis_client), prefix="fastapi-cache")
+    yield
 
 app = FastAPI(
     title="Sanquin API",
@@ -26,7 +26,7 @@ app = FastAPI(
     version="0.1.0",
     redoc_url=None,
     docs_url="/docs",
-    lifespan=lifespan_,
+    lifespan=lifespan,
 )
 
 app.include_router(users.router)
