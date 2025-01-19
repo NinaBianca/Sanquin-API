@@ -33,6 +33,8 @@ router = APIRouter(
     tags=["donations"],
 )
 
+redis_client = redis.from_url(os.getenv("REDIS_URL"))
+
 @router.post("/", response_model=ResponseModel)
 def create_new_donation(donation: DonationCreate, db: Session = Depends(get_db)):
     if not check_user_exists(db, donation.user_id):
@@ -97,26 +99,27 @@ def get_donation_route(donation_id: int, db: Session = Depends(get_db)):
 def get_all_location_info_route(db: Session = Depends(get_db)):
     try:
         cache_key = "locations_all"
-        redis_client = redis.from_url(os.getenv("REDIS_URL"))
-        compressed_data = redis_client.get(cache_key)
 
+        # Attempt to retrieve cached data
+        compressed_data = redis_client.get(cache_key)
         if compressed_data:
-            # Decompress the cached data
             decompressed_data = zlib.decompress(compressed_data).decode('utf-8')
-            output = json.loads(decompressed_data)  # Convert back to Python object (list of locations)
+            output = json.loads(decompressed_data)
             return ResponseModel(status=200, data=output, message="Location(s) retrieved successfully")
-        
-        # If not in cache, fetch from DB and compress it
+
+        # Fetch from DB if cache is empty
         locations = get_all_location_info(db)
-        output = [LocationInfoResponse.model_validate(location) for location in locations]
+        output = [location.model_dump() for location in locations]  # Ensure correct Pydantic v2 serialization
 
         # Convert to JSON and compress
-        json_data = json.dumps(jsonable_encoder(output))
+        json_data = json.dumps(jsonable_encoder(output))  # Ensure serialization safety
         compressed_data = zlib.compress(json_data.encode('utf-8'))
 
-        # Store the compressed data in Redis
+        # Store compressed data in Redis with 10-minute expiration
         redis_client.setex(cache_key, 600, compressed_data)
+
         return ResponseModel(status=200, data=output, message="Location(s) retrieved successfully")
+    
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred while retrieving location information: {e}") from e
 
