@@ -8,8 +8,7 @@ import redis
 import os
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import desc, or_, exists, and_, delete
-from sqlalchemy.sql import func
+from sqlalchemy import or_, exists, delete
 
 
 from ..models.donation import Donation
@@ -19,10 +18,8 @@ from ..schemas.donation import LocationInfoCreate, DonationCreate, DonationUpdat
 
 redis_url = os.getenv("REDIS_URL")
 
-# Setup Redis client with the Redis URL
 redis_client = redis.StrictRedis(redis_url)
 
-# Initialize FastAPI Cache with Redis
 FastAPICache.init(RedisBackend(redis_client), prefix="fastapi-cache")
 
 def check_donation_exists(db, donation_id):
@@ -127,7 +124,7 @@ def get_donation_by_id(db: Session, donation_id: int):
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=e) from e
 
-@cache(600)
+@cache(600, sync=True)
 def get_all_location_info(db: Session):
     try:
         locations = db.query(LocationInfo).all()
