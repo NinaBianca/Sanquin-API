@@ -62,7 +62,7 @@ class LocationInfoResponse(LocationInfoBase):
             "opening_hours": self.opening_hours,
             "latitude": self.latitude,
             "longitude": self.longitude,
-            "timeslots": self.timeslots
+            "timeslots": [timeslot.model_dump() for timeslot in self.timeslots]
         }
 
 class DonationBase(BaseModel):
