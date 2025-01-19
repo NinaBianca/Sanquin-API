@@ -16,11 +16,6 @@ from ..models.friend import Friend
 from ..models.location_info import LocationInfo, Timeslot
 from ..schemas.donation import LocationInfoCreate, DonationCreate, DonationUpdate
 
-redis_url = os.getenv("REDIS_URL")
-
-redis_client = redis.StrictRedis(redis_url)
-
-FastAPICache.init(RedisBackend(redis_client), prefix="fastapi-cache")
 
 def check_donation_exists(db, donation_id):
     return db.query(exists().where(Donation.id == donation_id)).scalar()
