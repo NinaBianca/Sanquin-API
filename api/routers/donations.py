@@ -95,7 +95,7 @@ def get_donation_route(donation_id: int, db: Session = Depends(get_db)):
 def get_all_location_info_route(db: Session = Depends(get_db)):
     try:
         cache_key = "locations_all"
-        redis_client = FastAPICache.get_backend().client  # Get the Redis client
+        redis_client = FastAPICache.get_backend()
         compressed_data = redis_client.get(cache_key)
 
         if compressed_data:
