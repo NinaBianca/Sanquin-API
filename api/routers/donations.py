@@ -1,5 +1,8 @@
 from fastapi import HTTPException, APIRouter, Depends
 from fastapi_cache.decorator import cache
+from fastapi_cache import FastAPICache
+import zlib
+import json
 from sqlalchemy.orm import Session
 
 from ..database import get_db
@@ -91,8 +94,26 @@ def get_donation_route(donation_id: int, db: Session = Depends(get_db)):
 @cache(600)
 def get_all_location_info_route(db: Session = Depends(get_db)):
     try:
+        cache_key = "locations_all"
+        redis_client = FastAPICache.get_backend().client  # Get the Redis client
+        compressed_data = redis_client.get(cache_key)
+
+        if compressed_data:
+            # Decompress the cached data
+            decompressed_data = zlib.decompress(compressed_data).decode('utf-8')
+            output = json.loads(decompressed_data)  # Convert back to Python object (list of locations)
+            return ResponseModel(status=200, data=output, message="Location(s) retrieved successfully")
+        
+        # If not in cache, fetch from DB and compress it
         locations = get_all_location_info(db)
         output = [LocationInfoResponse.model_validate(location) for location in locations]
+
+        # Convert to JSON and compress
+        json_data = json.dumps(output)
+        compressed_data = zlib.compress(json_data.encode('utf-8'))
+
+        # Store the compressed data in Redis
+        redis_client.setex(cache_key, 600, compressed_data)
         return ResponseModel(status=200, data=output, message="Location(s) retrieved successfully")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred while retrieving location information: {e}") from e
