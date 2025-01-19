@@ -20,7 +20,7 @@ from ..schemas.donation import LocationInfoCreate, DonationCreate, DonationUpdat
 redis_url = os.getenv("REDIS_URL")
 
 # Setup Redis client with the Redis URL
-redis_client = redis.from_url(redis_url)
+redis_client = redis.StrictRedis(redis_url)
 
 # Initialize FastAPI Cache with Redis
 FastAPICache.init(RedisBackend(redis_client), prefix="fastapi-cache")
