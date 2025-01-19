@@ -109,14 +109,15 @@ def get_all_location_info_route(db: Session = Depends(get_db)):
 
         # Fetch from DB if cache is empty
         locations = get_all_location_info(db)
-        output = [location.model_dump() for location in locations]  # Ensure correct Pydantic v2 serialization
-
+       
         # Convert to JSON and compress
-        json_data = json.dumps(jsonable_encoder(output))  # Ensure serialization safety
+        json_data = json.dumps(jsonable_encoder(locations))  # Ensure serialization safety
         compressed_data = zlib.compress(json_data.encode('utf-8'))
 
         # Store compressed data in Redis with 10-minute expiration
         redis_client.setex(cache_key, 600, compressed_data)
+
+        output = [LocationInfoResponse.model_validate(location) for location in locations]
 
         return ResponseModel(status=200, data=output, message="Location(s) retrieved successfully")
     
