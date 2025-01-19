@@ -1,9 +1,12 @@
 from datetime import datetime, timezone
 
 from fastapi import HTTPException
+from fastapi_cache.decorator import cache
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import desc, or_
+from sqlalchemy import desc, or_, exists, and_, delete
+from sqlalchemy.sql import func
+
 
 from ..models.donation import Donation
 from ..models.friend import Friend
@@ -11,10 +14,10 @@ from ..models.location_info import LocationInfo, Timeslot
 from ..schemas.donation import LocationInfoCreate, DonationCreate, DonationUpdate
 
 def check_donation_exists(db, donation_id):
-    return db.query(Donation).filter(Donation.id == donation_id).first() is not None
-    
+    return db.query(exists().where(Donation.id == donation_id)).scalar()
+
 def check_location_exists(db, location_id):
-    return db.query(LocationInfo).filter(LocationInfo.id == location_id).first() is not None
+    return db.query(exists().where(LocationInfo.id == location_id)).scalar()
     
 def create_donation(db: Session, donation: DonationCreate):
     try: 
@@ -46,36 +49,34 @@ def get_donations_by_user_id(db: Session, user_id: int):
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=e) from e
     
+
 def get_friends_donations(db: Session, user_id: int):
     try:
-        friends = db.query(Friend).filter(or_(Friend.sender_id == user_id, Friend.receiver_id == user_id), Friend.status == "accepted").all()
-        friends_donations = []
         current_date = datetime.now(timezone.utc)
-        for friend in friends:
-            friend_id = friend.sender_id if friend.sender_id != user_id else friend.receiver_id
-            friend_donations = db.query(Donation).filter(Donation.user_id == friend_id, Donation.enable_joining == True, Donation.appointment > current_date).all()
-            friends_donations.extend(friend_donations)
+        friends_donations = (
+            db.query(Donation)
+            .join(Friend, or_(Friend.sender_id == Donation.user_id, Friend.receiver_id == Donation.user_id))
+            .filter(
+                or_(Friend.sender_id == user_id, Friend.receiver_id == user_id),
+                Friend.status == "accepted",
+                Donation.enable_joining == True,
+                Donation.appointment > current_date
+            )
+            .all()
+        )
         return friends_donations
     except SQLAlchemyError as e:
-        raise HTTPException(status_code=500, detail=e) from e
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 def delete_donation(db: Session, donation_id: int):
     try:
-        if not check_donation_exists(db, donation_id):
-            raise HTTPException(
-                status_code=404, detail=f"Donation not found with ID {donation_id}"
-            )
-        donation = db.query(Donation).filter(Donation.id == donation_id).first()
-        if not donation:
-            raise HTTPException(
-                status_code=404, detail=f"Donation not found with ID {donation_id}"
-            )
-        db.delete(donation)
+        result = db.execute(delete(Donation).where(Donation.id == donation_id))
+        if result.rowcount == 0:
+            raise HTTPException(status_code=404, detail=f"Donation not found with ID {donation_id}")
         db.commit()
-        return donation
     except SQLAlchemyError as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=e) from e
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 def update_donation(db: Session, donation_id: int, donation_partial: DonationUpdate):
     try:
@@ -114,6 +115,7 @@ def get_donation_by_id(db: Session, donation_id: int):
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail=e) from e
 
+@cache(600)
 def get_all_location_info(db: Session):
     try:
         locations = db.query(LocationInfo).all()
