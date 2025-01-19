@@ -17,6 +17,7 @@ def lifespan(app: FastAPI):
     redis_url = os.getenv("REDIS_URL")
     redis_client = redis.from_url(redis_url)
     FastAPICache.init(RedisBackend(redis_client), prefix="fastapi-cache")
+    yield
 
 app = FastAPI(
     title="Sanquin API",
